@@ -1,0 +1,8 @@
+language: php
+os:
+  - linux
+sudo: false
+php:
+  - 7.0
+  - 7.1
+  - 7.2
