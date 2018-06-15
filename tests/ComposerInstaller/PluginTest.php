@@ -23,8 +23,5 @@ class PluginTest extends TestCase
 
         $installer = $installationManager->getInstaller('kirby-cms');
         $this->assertInstanceOf(Installer::class, $installer);
-
-        $installer = $installationManager->getInstaller('kirby-panel');
-        $this->assertInstanceOf(Installer::class, $installer);
     }
 }

@@ -1,17 +1,16 @@
 # Kirby Composer Installer
 
-This is Kirby's custom [Composer installer](https://getcomposer.org/doc/articles/custom-installers.md) for the Kirby CMS and Panel.
-It is responsible for automatically choosing the correct installation paths if you install the CMS or the Panel via Composer.
+This is Kirby's custom [Composer installer](https://getcomposer.org/doc/articles/custom-installers.md) for the Kirby CMS.
+It is responsible for automatically choosing the correct installation paths if you install the CMS via Composer.
 
 ## Default configuration
 
-If you `require` the `getkirby/cms` or `getkirby/panel` packages in your own `composer.json` there is nothing else you need to do:
+If you `require` the `getkirby/cms` package in your own `composer.json`, there is nothing else you need to do:
 
 ```js
 {
   "require": {
-    "getkirby/cms":   "^3.0",
-    "getkirby/panel": "^3.0"
+    "getkirby/cms": "^3.0"
   },
   "repositories": [
     {
@@ -22,17 +21,16 @@ If you `require` the `getkirby/cms` or `getkirby/panel` packages in your own `co
 }
 ```
 
-Kirby's Composer installer (this repo) will run automatically and will install the CMS to the `kirby` directory and the Panel to the `panel` directory.
+Kirby's Composer installer (this repo) will run automatically and will install the CMS to the `kirby` directory.
 
-## Custom installation paths
+## Custom installation path
 
-You might want to use different installation paths. The paths can be configured like this in your `composer.json`:
+You might want to use a different installation path. The path can be configured like this in your `composer.json`:
 
 ```js
 {
   "require": {
-    "getkirby/cms":   "^3.0",
-    "getkirby/panel": "^3.0"
+    "getkirby/cms": "^3.0"
   },
   "repositories": [
     {
@@ -41,8 +39,7 @@ You might want to use different installation paths. The paths can be configured 
     }
   ],
   "extra": {
-    "kirby-cms-path":   "kirby", // change this to your custom path
-    "kirby-panel-path": "panel"  // change this to your custom path
+    "kirby-cms-path": "kirby" // change this to your custom path
   }
 }
 ```

@@ -16,9 +16,6 @@ use Composer\Package\PackageInterface;
  */
 class Installer extends LibraryInstaller
 {
-    // List of installation paths
-    private static $installations = [];
-
     /**
      * Decides if the installer supports the given type
      *
@@ -27,7 +24,7 @@ class Installer extends LibraryInstaller
      */
     public function supports($packageType): bool
     {
-        return in_array($packageType, ['kirby-cms', 'kirby-panel']);
+        return $packageType === 'kirby-cms';
     }
 
     /**
@@ -45,33 +42,14 @@ class Installer extends LibraryInstaller
             $extra = [];
         }
 
-        // determine the path based on the type of the package we need to install
-        switch ($package->getType()) {
-            case 'kirby-cms':
-                $path = $extra['kirby-cms-path'] ?? 'kirby';
-                break;
-            case 'kirby-panel':
-                $path = $extra['kirby-panel-path'] ?? 'panel';
-                break;
-            default:
-                throw new InvalidArgumentException('Unsupported package type ' . $package->getType() . '.');
-        }
+        // use path from configuration, otherwise fall back to default
+        $path = $extra['kirby-cms-path'] ?? 'kirby';
 
         // don't allow unsafe directories
         $vendorDir = $this->composer->getConfig()->get('vendor-dir', Config::RELATIVE_PATHS) ?? 'vendor';
         if ($path === $vendorDir || $path === '.') {
             throw new InvalidArgumentException('The path ' . $path . ' is an unsafe installation directory for ' . $package->getPrettyName() . '.');
         }
-
-        // don't allow installation of multiple packages to the same directory
-        if (isset(static::$installations[$path]) && static::$installations[$path] !== $package->getPrettyName()) {
-            throw new InvalidArgumentException(
-                'The path ' . $path . ' is already in use by package ' .
-                static::$installations[$path] . ', cannot install package ' .
-                $package->getPrettyName() . ' to same location.'
-            );
-        }
-        static::$installations[$path] = $package->getPrettyName();
 
         return $path;
     }
