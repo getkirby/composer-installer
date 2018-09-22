@@ -1,5 +1,8 @@
 # Kirby Composer Installer
 
+[![Build Status](https://travis-ci.com/k-next/composer-installer.svg?branch=master)](https://travis-ci.com/k-next/composer-installer)
+[![Coverage Status](https://coveralls.io/repos/github/k-next/composer-installer/badge.svg?branch=master)](https://coveralls.io/github/k-next/composer-installer?branch=master)
+
 This is Kirby's custom [Composer installer](https://getcomposer.org/doc/articles/custom-installers.md) for the Kirby CMS.
 It is responsible for automatically choosing the correct installation paths if you install the CMS via Composer.
 
@@ -11,13 +14,7 @@ If you `require` the `getkirby/cms` package in your own `composer.json`, there i
 {
   "require": {
     "getkirby/cms": "^3.0"
-  },
-  "repositories": [
-    {
-      "type": "composer",
-      "url":  "https://composer.getkirby.com"
-    }
-  ]
+  }
 }
 ```
 
@@ -32,12 +29,6 @@ You might want to use a different installation path. The path can be configured 
   "require": {
     "getkirby/cms": "^3.0"
   },
-  "repositories": [
-    {
-      "type": "composer",
-      "url":  "https://composer.getkirby.com"
-    }
-  ],
   "extra": {
     "kirby-cms-path": "kirby" // change this to your custom path
   }
