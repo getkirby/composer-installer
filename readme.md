@@ -8,12 +8,12 @@ It is responsible for automatically choosing the correct installation paths if y
 
 ## Default configuration
 
-If you `require` the `getkirby/kirby` package in your own `composer.json`, there is nothing else you need to do:
+If you `require` the `getkirby/cms` package in your own `composer.json`, there is nothing else you need to do:
 
 ```js
 {
   "require": {
-    "getkirby/kirby": "^3.0"
+    "getkirby/cms": "^3.0"
   }
 }
 ```
@@ -27,7 +27,7 @@ You might want to use a different installation path. The path can be configured 
 ```js
 {
   "require": {
-    "getkirby/kirby": "^3.0"
+    "getkirby/cms": "^3.0"
   },
   "extra": {
     "kirby-cms-path": "kirby" // change this to your custom path
