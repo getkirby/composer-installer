@@ -37,6 +37,11 @@ class PluginInstaller extends LibraryInstaller
      */
     public function getInstallPath(PackageInterface $package): string
     {
+        // place into `vendor` directory as usual if Pluginkit is not supported
+        if (!$this->supportsPluginkit($package)) {
+            return parent::getInstallPath($package);
+        }
+
         // get the extra configuration of the top-level package
         if ($rootPackage = $this->composer->getPackage()) {
             $extra = $rootPackage->getExtra();
@@ -75,7 +80,12 @@ class PluginInstaller extends LibraryInstaller
         // first install the plugin normally
         parent::install($repo, $package);
 
-        // remove its `vendor` directory to avoid duplicated autoloader and vendor code
+        // only continue if Pluginkit is supported
+        if (!$this->supportsPluginkit($package)) {
+            return;
+        }
+
+        // remove the plugin's `vendor` directory to avoid duplicated autoloader and vendor code
         $packageVendorDir = $this->getPackageBasePath($package) . '/vendor';
         if (is_dir($packageVendorDir)) {
             $success = $this->filesystem->removeDirectory($packageVendorDir);
@@ -85,5 +95,25 @@ class PluginInstaller extends LibraryInstaller
                 // @codeCoverageIgnoreEnd
             }
         }
+    }
+
+    /**
+     * Checks if the package has explicitly required this installer;
+     * otherwise the installer will fall back to the behavior of the LibraryInstaller
+     * (Pluginkit is not yet supported by the plugin)
+     *
+     * @param  PackageInterface $package
+     * @return bool
+     */
+    protected function supportsPluginkit(PackageInterface $package): bool
+    {
+        foreach ($package->getRequires() as $link) {
+            if ($link->getTarget() === 'getkirby/composer-installer') {
+                return true;
+            }
+        }
+
+        // no required package is the installer
+        return false;
     }
 }
