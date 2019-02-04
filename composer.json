@@ -1,6 +1,6 @@
 {
     "name": "getkirby/composer-installer",
-    "description": "Kirby's custom Composer installer for the Kirby CMS",
+    "description": "Kirby's custom Composer installer for the Kirby CMS and for Kirby plugins",
     "type": "composer-plugin",
     "license": "MIT",
     "homepage": "https://getkirby.com",

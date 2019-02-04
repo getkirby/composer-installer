@@ -14,7 +14,7 @@ use Composer\Package\PackageInterface;
  * @copyright Bastian Allgeier
  * @license   MIT
  */
-class Installer extends LibraryInstaller
+class CmsInstaller extends LibraryInstaller
 {
     /**
      * Decides if the installer supports the given type

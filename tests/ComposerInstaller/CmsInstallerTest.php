@@ -3,7 +3,6 @@
 namespace Kirby\ComposerInstaller;
 
 use PHPUnit\Framework\TestCase;
-use ReflectionProperty;
 
 use Composer\Composer;
 use Composer\Config;
@@ -11,7 +10,7 @@ use Composer\IO\NullIO;
 use Composer\Package\Package;
 use Composer\Package\RootPackage;
 
-class InstallerTest extends TestCase
+class CmsInstallerTest extends TestCase
 {
     protected $composer;
     protected $installer;
@@ -21,7 +20,7 @@ class InstallerTest extends TestCase
         // initialize new Composer and Installer instances
         $this->composer = new Composer();
         $this->composer->setConfig(new Config());
-        $this->installer = new Installer(new NullIO(), $this->composer);
+        $this->installer = new CmsInstaller(new NullIO(), $this->composer);
     }
 
     public function testSupports()
