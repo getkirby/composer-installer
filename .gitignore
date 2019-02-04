@@ -1,6 +1,7 @@
 .DS_Store
 
+composer.lock
+
 /tests/coverage
 /tests/tmp
 /vendor
-composer.lock
