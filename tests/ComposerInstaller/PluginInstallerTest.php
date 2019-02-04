@@ -92,18 +92,13 @@ class PluginInstallerTest extends TestCase
 
     public function testGetInstallPathNoSupport()
     {
-        $package = new Package('superwoman/superplugin', '1.0.0.0', '1.0.0');
-        $package->setType('kirby-plugin');
+        $package = $this->pluginPackageFactory(false, false);
         $this->assertEquals($this->testDir . '/vendor/superwoman/superplugin', $this->installer->getInstallPath($package));
     }
 
     public function testGetInstallPathDefault()
     {
-        $package = new Package('superwoman/superplugin', '1.0.0.0', '1.0.0');
-        $package->setType('kirby-plugin');
-        $package->setRequires([
-            new Link('superwoman/superplugin', 'getkirby/composer-installer')
-        ]);
+        $package = $this->pluginPackageFactory(true, false);
         $this->assertEquals('site/plugins/superplugin', $this->installer->getInstallPath($package));
     }
 
@@ -119,11 +114,7 @@ class PluginInstallerTest extends TestCase
 
     public function testGetInstallPathInstallerName()
     {
-        $package = new Package('superwoman/superplugin', '1.0.0.0', '1.0.0');
-        $package->setType('kirby-plugin');
-        $package->setRequires([
-            new Link('superwoman/superplugin', 'getkirby/composer-installer')
-        ]);
+        $package = $this->pluginPackageFactory(true, false);
         $package->setExtra([
             'installer-name' => 'another-name'
         ]);
@@ -138,18 +129,10 @@ class PluginInstallerTest extends TestCase
         ]);
         $this->composer->setPackage($rootPackage);
 
-        $package = new Package('superwoman/superplugin', '1.0.0.0', '1.0.0');
-        $package->setType('kirby-plugin');
-        $package->setRequires([
-            new Link('superwoman/superplugin', 'getkirby/composer-installer')
-        ]);
+        $package = $this->pluginPackageFactory(true, false);
         $this->assertEquals('data/plugins/superplugin', $this->installer->getInstallPath($package));
 
-        $package = new Package('superwoman/superplugin', '1.0.0.0', '1.0.0');
-        $package->setType('kirby-plugin');
-        $package->setRequires([
-            new Link('superwoman/superplugin', 'getkirby/composer-installer')
-        ]);
+        $package = $this->pluginPackageFactory(true, false);
         $package->setExtra([
             'installer-name' => 'another-name'
         ]);
@@ -163,8 +146,7 @@ class PluginInstallerTest extends TestCase
         $rootPackage = new RootPackage('getkirby/amazing-site', '1.0.0.0', '1.0.0');
         $this->composer->setPackage($rootPackage);
 
-        $package = new Package('superwoman/superplugin', '1.0.0.0', '1.0.0');
-        $package->setType('kirby-plugin');
+        $package = $this->pluginPackageFactory(false, false);
         $this->assertEquals($this->testDir . '/vendor/superwoman/superplugin', $this->installer->getInstallPath($package));
         $this->installer->install($repo, $package);
         $this->assertDirectoryNotExists($this->testDir . '/vendor/superwoman/superplugin');
@@ -177,11 +159,7 @@ class PluginInstallerTest extends TestCase
         $rootPackage = new RootPackage('getkirby/amazing-site', '1.0.0.0', '1.0.0');
         $this->composer->setPackage($rootPackage);
 
-        $package = new Package('superwoman/superplugin', '1.0.0.0', '1.0.0');
-        $package->setType('kirby-plugin');
-        $package->setRequires([
-            new Link('superwoman/superplugin', 'getkirby/composer-installer')
-        ]);
+        $package = $this->pluginPackageFactory(true, false);
         $this->assertEquals('site/plugins/superplugin', $this->installer->getInstallPath($package));
         $this->installer->install($repo, $package);
         $this->assertFileExists($this->testDir . '/site/plugins/superplugin/index.php');
@@ -196,18 +174,38 @@ class PluginInstallerTest extends TestCase
         $rootPackage = new RootPackage('getkirby/amazing-site', '1.0.0.0', '1.0.0');
         $this->composer->setPackage($rootPackage);
 
-        $package = new Package('superwoman/superplugin', '1.0.0.0', '1.0.0');
-        $package->setType('kirby-plugin');
-        $package->setRequires([
-            new Link('superwoman/superplugin', 'getkirby/composer-installer')
-        ]);
-        $package->setExtra([
-            'with-vendor-dir' => true
-        ]);
+        $package = $this->pluginPackageFactory(true, true);
         $this->assertEquals('site/plugins/superplugin', $this->installer->getInstallPath($package));
         $this->installer->install($repo, $package);
         $this->assertFileExists($this->testDir . '/site/plugins/superplugin/index.php');
         $this->assertFileExists($this->testDir . '/site/plugins/superplugin/vendor-created.txt');
         $this->assertDirectoryNotExists($this->testDir . '/site/plugins/superplugin/vendor');
+    }
+
+    /**
+     * Creates a dummy plugin package
+     *
+     * @param  bool    $supported Whether the plugin package has required the installer
+     * @param  bool    $vendorDir Whether the plugin has a vendor directory committed
+     * @return Package
+     */
+    protected function pluginPackageFactory(bool $supported, bool $vendorDir): Package
+    {
+        $package = new Package('superwoman/superplugin', '1.0.0.0', '1.0.0');
+        $package->setType('kirby-plugin');
+
+        if ($supported === true) {
+            $package->setRequires([
+                new Link('superwoman/superplugin', 'getkirby/composer-installer')
+            ]);
+        }
+
+        if ($vendorDir === true) {
+            $package->setExtra([
+                'with-vendor-dir' => true
+            ]);
+        }
+
+        return $package;
     }
 }
