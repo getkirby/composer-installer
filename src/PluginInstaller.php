@@ -7,7 +7,6 @@ use RuntimeException;
 use Composer\Config;
 use Composer\Installer\LibraryInstaller;
 use Composer\Package\PackageInterface;
-use Composer\Repository\InstalledRepositoryInterface;
 
 /**
  * @package   Kirby Composer Installer
@@ -70,15 +69,15 @@ class PluginInstaller extends LibraryInstaller
     }
 
     /**
-     * Installs specific package.
+     * Method override from the Composer LibraryInstaller;
+     * run when the plugin's code is being installed or updated
      *
-     * @param InstalledRepositoryInterface $repo    repository in which to check
-     * @param PackageInterface             $package package instance
+     * @param PackageInterface $package
      */
-    public function install(InstalledRepositoryInterface $repo, PackageInterface $package)
+    protected function installCode(PackageInterface $package)
     {
         // first install the plugin normally
-        parent::install($repo, $package);
+        parent::installCode($package);
 
         // only continue if Pluginkit is supported
         if (!$this->supportsPluginkit($package)) {
