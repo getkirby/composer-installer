@@ -22,8 +22,6 @@ class MockDownloader implements DownloaderInterface
 
     public function download(PackageInterface $package, $path)
     {
-        $path = dirname(__DIR__) . '/tmp/' . $path;
-
         // install a fake package directory
         $this->filesystem->ensureDirectoryExists($path);
         touch($path . '/index.php');
