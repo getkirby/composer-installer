@@ -162,6 +162,8 @@ class PluginInstallerTest extends TestCase
     {
         $package = new Package('superwoman/superplugin', '1.0.0.0', '1.0.0');
         $package->setType('kirby-plugin');
+        $package->setInstallationSource('dist');
+        $package->setDistType('mock');
 
         if ($supported === true) {
             $package->setRequires([

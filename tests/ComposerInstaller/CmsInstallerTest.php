@@ -57,6 +57,8 @@ class CmsInstallerTest extends TestCase
     {
         $package = new Package('getkirby/cms', '1.0.0.0', '1.0.0');
         $package->setType('kirby-cms');
+        $package->setInstallationSource('dist');
+        $package->setDistType('mock');
         $this->assertEquals('kirby', $this->installer->getInstallPath($package));
     }
 
@@ -70,6 +72,8 @@ class CmsInstallerTest extends TestCase
 
         $package = new Package('getkirby/cms', '1.0.0.0', '1.0.0');
         $package->setType('kirby-cms');
+        $package->setInstallationSource('dist');
+        $package->setDistType('mock');
         $this->assertEquals('cms', $this->installer->getInstallPath($package));
     }
 
@@ -87,6 +91,8 @@ class CmsInstallerTest extends TestCase
 
         $package = new Package('getkirby/cms', '1.0.0.0', '1.0.0');
         $package->setType('kirby-cms');
+        $package->setInstallationSource('dist');
+        $package->setDistType('mock');
         $this->installer->getInstallPath($package);
     }
 
@@ -110,6 +116,8 @@ class CmsInstallerTest extends TestCase
 
         $package = new Package('getkirby/cms', '1.0.0.0', '1.0.0');
         $package->setType('kirby-cms');
+        $package->setInstallationSource('dist');
+        $package->setDistType('mock');
         $this->installer->getInstallPath($package);
     }
 
@@ -127,6 +135,8 @@ class CmsInstallerTest extends TestCase
 
         $package = new Package('getkirby/cms', '1.0.0.0', '1.0.0');
         $package->setType('kirby-cms');
+        $package->setInstallationSource('dist');
+        $package->setDistType('mock');
         $this->assertEquals('custom-vendor', $this->installer->getInstallPath($package));
 
         $this->composer->getConfig()->merge([
@@ -137,6 +147,8 @@ class CmsInstallerTest extends TestCase
 
         $package = new Package('getkirby/cms', '1.0.0.0', '1.0.0');
         $package->setType('kirby-cms');
+        $package->setInstallationSource('dist');
+        $package->setDistType('mock');
         $this->installer->getInstallPath($package);
     }
 
@@ -150,6 +162,8 @@ class CmsInstallerTest extends TestCase
 
         $package = new Package('getkirby/cms', '1.0.0.0', '1.0.0');
         $package->setType('kirby-cms');
+        $package->setInstallationSource('dist');
+        $package->setDistType('mock');
         $package->setExtra([
             'with-vendor-dir' => true
         ]);
