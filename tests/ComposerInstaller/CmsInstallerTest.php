@@ -3,13 +3,13 @@
 namespace Kirby\ComposerInstaller;
 
 use PHPUnit\Framework\TestCase;
-use ReflectionMethod;
 
 use Composer\Composer;
 use Composer\Config;
 use Composer\IO\NullIO;
 use Composer\Package\Package;
 use Composer\Package\RootPackage;
+use Composer\Repository\InstalledArrayRepository;
 use Composer\Util\Filesystem;
 
 class CmsInstallerTest extends TestCase
@@ -152,11 +152,8 @@ class CmsInstallerTest extends TestCase
         $this->installer->getInstallPath($package);
     }
 
-    public function testInstallCode()
+    public function testInstall()
     {
-        $installCodeMethod = new ReflectionMethod($this->installer, 'installCode');
-        $installCodeMethod->setAccessible(true);
-
         $rootPackage = new RootPackage('getkirby/amazing-site', '1.0.0.0', '1.0.0');
         $this->composer->setPackage($rootPackage);
 
@@ -168,7 +165,45 @@ class CmsInstallerTest extends TestCase
             'with-vendor-dir' => true
         ]);
         $this->assertEquals('kirby', $this->installer->getInstallPath($package));
-        $installCodeMethod->invoke($this->installer, $package);
+        $this->installer->install(new InstalledArrayRepository(), $package);
+        $this->assertFileExists($this->testDir . '/kirby/index.php');
+        $this->assertFileExists($this->testDir . '/kirby/vendor-created.txt');
+        $this->assertDirectoryNotExists($this->testDir . '/kirby/vendor');
+    }
+
+    public function testUpdateCode()
+    {
+        $repo = new InstalledArrayRepository();
+
+        $rootPackage = new RootPackage('getkirby/amazing-site', '1.0.0.0', '1.0.0');
+        $this->composer->setPackage($rootPackage);
+
+        $initial = new Package('getkirby/cms', '1.0.0.0', '1.0.0');
+        $initial->setType('kirby-cms');
+        $initial->setInstallationSource('dist');
+        $initial->setDistType('mock');
+        $initial->setExtra([
+            'with-vendor-dir' => true
+        ]);
+        $this->assertEquals('kirby', $this->installer->getInstallPath($initial));
+        $this->installer->install($repo, $initial);
+        $repo->addPackage($initial);
+        $this->assertFileExists($this->testDir . '/kirby/index.php');
+        $this->assertFileExists($this->testDir . '/kirby/vendor-created.txt');
+        $this->assertDirectoryNotExists($this->testDir . '/kirby/vendor');
+
+        unlink($this->testDir . '/kirby/index.php');
+        $this->assertFileNotExists($this->testDir . '/kirby/index.php');
+
+        $target = new Package('getkirby/cms', '1.1.0.0', '1.1.0');
+        $target->setType('kirby-cms');
+        $target->setInstallationSource('dist');
+        $target->setDistType('mock');
+        $target->setExtra([
+            'with-vendor-dir' => true
+        ]);
+        $this->assertEquals('kirby', $this->installer->getInstallPath($target));
+        $this->installer->update($repo, $initial, $target);
         $this->assertFileExists($this->testDir . '/kirby/index.php');
         $this->assertFileExists($this->testDir . '/kirby/vendor-created.txt');
         $this->assertDirectoryNotExists($this->testDir . '/kirby/vendor');
