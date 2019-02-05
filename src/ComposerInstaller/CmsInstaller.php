@@ -53,4 +53,27 @@ class CmsInstaller extends LibraryInstaller
 
         return $path;
     }
+
+    /**
+     * Method override from the Composer LibraryInstaller;
+     * run when the CMS code is being installed or updated
+     *
+     * @param PackageInterface $package
+     */
+    protected function installCode(PackageInterface $package)
+    {
+        // first install the CMS normally
+        parent::installCode($package);
+
+        // remove the CMS' `vendor` directory to avoid duplicated autoloader and vendor code
+        $packageVendorDir = $this->getPackageBasePath($package) . '/vendor';
+        if (is_dir($packageVendorDir)) {
+            $success = $this->filesystem->removeDirectory($packageVendorDir);
+            if (!$success) {
+                // @codeCoverageIgnoreStart
+                throw new RuntimeException('Could not completely delete ' . $path . ', aborting.');
+                // @codeCoverageIgnoreEnd
+            }
+        }
+    }
 }

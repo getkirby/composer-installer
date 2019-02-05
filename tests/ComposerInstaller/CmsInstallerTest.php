@@ -3,12 +3,14 @@
 namespace Kirby\ComposerInstaller;
 
 use PHPUnit\Framework\TestCase;
+use ReflectionMethod;
 
 use Composer\Composer;
 use Composer\Config;
 use Composer\IO\NullIO;
 use Composer\Package\Package;
 use Composer\Package\RootPackage;
+use Composer\Util\Filesystem;
 
 class CmsInstallerTest extends TestCase
 {
@@ -17,10 +19,31 @@ class CmsInstallerTest extends TestCase
 
     public function setUp()
     {
+        // change to the test dir
+        $this->testDir = dirname(__DIR__) . '/tmp';
+        if (!is_dir($this->testDir)) {
+            mkdir($this->testDir);
+        }
+        chdir($this->testDir);
+
         // initialize new Composer and Installer instances
+        $io = new NullIO();
+        $config = new Config();
+        $config->merge([
+            'config' => [
+                'vendor-dir' => $this->testDir . '/vendor'
+            ]
+        ]);
+        $this->filesystem = new Filesystem();
         $this->composer = new Composer();
-        $this->composer->setConfig(new Config());
-        $this->installer = new CmsInstaller(new NullIO(), $this->composer);
+        $this->composer->setConfig($config);
+        $this->composer->setDownloadManager(new MockDownloadManager($io, false, $this->filesystem));
+        $this->installer = new CmsInstaller($io, $this->composer);
+    }
+
+    public function tearDown()
+    {
+        $this->filesystem->removeDirectory($this->testDir);
     }
 
     public function testSupports()
@@ -79,6 +102,12 @@ class CmsInstallerTest extends TestCase
         ]);
         $this->composer->setPackage($rootPackage);
 
+        $this->composer->getConfig()->merge([
+            'config' => [
+                'vendor-dir' => 'vendor'
+            ]
+        ]);
+
         $package = new Package('getkirby/cms', '1.0.0.0', '1.0.0');
         $package->setType('kirby-cms');
         $this->installer->getInstallPath($package);
@@ -109,5 +138,25 @@ class CmsInstallerTest extends TestCase
         $package = new Package('getkirby/cms', '1.0.0.0', '1.0.0');
         $package->setType('kirby-cms');
         $this->installer->getInstallPath($package);
+    }
+
+    public function testInstallCode()
+    {
+        $installCodeMethod = new ReflectionMethod($this->installer, 'installCode');
+        $installCodeMethod->setAccessible(true);
+
+        $rootPackage = new RootPackage('getkirby/amazing-site', '1.0.0.0', '1.0.0');
+        $this->composer->setPackage($rootPackage);
+
+        $package = new Package('getkirby/cms', '1.0.0.0', '1.0.0');
+        $package->setType('kirby-cms');
+        $package->setExtra([
+            'with-vendor-dir' => true
+        ]);
+        $this->assertEquals('kirby', $this->installer->getInstallPath($package));
+        $installCodeMethod->invoke($this->installer, $package);
+        $this->assertFileExists($this->testDir . '/kirby/index.php');
+        $this->assertFileExists($this->testDir . '/kirby/vendor-created.txt');
+        $this->assertDirectoryNotExists($this->testDir . '/kirby/vendor');
     }
 }

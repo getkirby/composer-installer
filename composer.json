@@ -13,12 +13,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Kirby\\ComposerInstaller\\": "src/"
+            "Kirby\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Kirby\\ComposerInstaller\\": "tests/"
+            "Kirby\\": "tests/"
         }
     },
     "scripts": {
