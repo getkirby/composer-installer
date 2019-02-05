@@ -7,6 +7,7 @@ use RuntimeException;
 use Composer\Config;
 use Composer\Installer\LibraryInstaller;
 use Composer\Package\PackageInterface;
+use Composer\Repository\InstalledRepositoryInterface;
 
 /**
  * @package   Kirby Composer Installer
@@ -69,16 +70,46 @@ class PluginInstaller extends LibraryInstaller
     }
 
     /**
-     * Method override from the Composer LibraryInstaller;
-     * run when the plugin's code is being installed or updated
+     * Installs specific package.
+     *
+     * @param InstalledRepositoryInterface $repo    repository in which to check
+     * @param PackageInterface             $package package instance
+     */
+    public function install(InstalledRepositoryInterface $repo, PackageInterface $package)
+    {
+        // first install the package normally...
+        parent::install($repo, $package);
+
+        // ...then run custom code
+        $this->postInstall($package);
+    }
+
+    /**
+     * Updates specific package.
+     *
+     * @param InstalledRepositoryInterface $repo    repository in which to check
+     * @param PackageInterface             $initial already installed package version
+     * @param PackageInterface             $target  updated version
+     *
+     * @throws InvalidArgumentException if $initial package is not installed
+     */
+    public function update(InstalledRepositoryInterface $repo, PackageInterface $initial, PackageInterface $target)
+    {
+        // first update the package normally...
+        parent::update($repo, $initial, $target);
+
+        // ...then run custom code
+        $this->postInstall($target);
+    }
+
+    /**
+     * Custom handler that will be called after each package
+     * installation or update
      *
      * @param PackageInterface $package
      */
-    protected function installCode(PackageInterface $package)
+    protected function postInstall(PackageInterface $package)
     {
-        // first install the plugin normally
-        parent::installCode($package);
-
         // only continue if Pluginkit is supported
         if (!$this->supportsPluginkit($package)) {
             return;
