@@ -69,7 +69,7 @@ class Installer extends LibraryInstaller
     protected function postInstall(PackageInterface $package)
     {
         // remove the package's `vendor` directory to avoid duplicated autoloader and vendor code
-        $packageVendorDir = $this->getPackageBasePath($package) . '/vendor';
+        $packageVendorDir = $this->getInstallPath($package) . '/vendor';
         if (is_dir($packageVendorDir)) {
             $success = $this->filesystem->removeDirectory($packageVendorDir);
             if (!$success) {
