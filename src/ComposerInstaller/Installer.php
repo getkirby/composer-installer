@@ -22,9 +22,9 @@ class Installer extends LibraryInstaller
      * @param  string $packageType
      * @return bool
      */
-    public function supports($packageType)
+    public function supports($packageType): bool
     {
-        throw new RuntimeException('This method needs to be overridden.');
+        throw new RuntimeException('This method needs to be overridden.'); // @codeCoverageIgnore
     }
 
     /**
@@ -73,9 +73,7 @@ class Installer extends LibraryInstaller
         if (is_dir($packageVendorDir)) {
             $success = $this->filesystem->removeDirectory($packageVendorDir);
             if (!$success) {
-                // @codeCoverageIgnoreStart
-                throw new RuntimeException('Could not completely delete ' . $path . ', aborting.');
-                // @codeCoverageIgnoreEnd
+                throw new RuntimeException('Could not completely delete ' . $path . ', aborting.'); // @codeCoverageIgnore
             }
         }
     }

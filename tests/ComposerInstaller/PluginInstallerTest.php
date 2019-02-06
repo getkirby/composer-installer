@@ -4,11 +4,13 @@ namespace Kirby\ComposerInstaller;
 
 use Composer\Package\Link;
 use Composer\Package\Package;
-use Composer\Package\RootPackage;
 use Composer\Repository\InstalledArrayRepository;
 
 class PluginInstallerTest extends InstallerTestCase
 {
+    const SUPPORTED  = 1;
+    const VENDOR_DIR = 2;
+
     public function setUp()
     {
         parent::setUp();
@@ -25,29 +27,26 @@ class PluginInstallerTest extends InstallerTestCase
 
     public function testGetInstallPathNoSupport()
     {
-        $package = $this->pluginPackageFactory(false, false);
+        $package = $this->pluginPackageFactory();
         $this->assertEquals($this->testDir . '/vendor/superwoman/superplugin', $this->installer->getInstallPath($package));
     }
 
     public function testGetInstallPathDefault()
     {
-        $package = $this->pluginPackageFactory(true, false);
+        $package = $this->pluginPackageFactory(self::SUPPORTED);
         $this->assertEquals('site/plugins/superplugin', $this->installer->getInstallPath($package));
     }
 
     public function testGetInstallPathNoVendor()
     {
-        $package = new Package('superplugin', '1.0.0.0', '1.0.0');
-        $package->setType('kirby-plugin');
-        $package->setRequires([
-            new Link('superwoman/superplugin', 'getkirby/composer-installer')
-        ]);
+        $package = $this->pluginPackageFactory(self::SUPPORTED, 'superplugin');
+        $this->assertEquals('superplugin', $package->getPrettyName());
         $this->assertEquals('site/plugins/superplugin', $this->installer->getInstallPath($package));
     }
 
     public function testGetInstallPathInstallerName()
     {
-        $package = $this->pluginPackageFactory(true, false);
+        $package = $this->pluginPackageFactory(self::SUPPORTED);
         $package->setExtra([
             'installer-name' => 'another-name'
         ]);
@@ -56,16 +55,14 @@ class PluginInstallerTest extends InstallerTestCase
 
     public function testGetInstallPathCustomPaths()
     {
-        $rootPackage = new RootPackage('getkirby/amazing-site', '1.0.0.0', '1.0.0');
-        $rootPackage->setExtra([
+        $this->initRootPackage()->setExtra([
             'kirby-plugin-path' => 'data/plugins'
         ]);
-        $this->composer->setPackage($rootPackage);
 
-        $package = $this->pluginPackageFactory(true, false);
+        $package = $this->pluginPackageFactory(self::SUPPORTED);
         $this->assertEquals('data/plugins/superplugin', $this->installer->getInstallPath($package));
 
-        $package = $this->pluginPackageFactory(true, false);
+        $package = $this->pluginPackageFactory(self::SUPPORTED);
         $package->setExtra([
             'installer-name' => 'another-name'
         ]);
@@ -74,10 +71,7 @@ class PluginInstallerTest extends InstallerTestCase
 
     public function testInstallNoSupport()
     {
-        $rootPackage = new RootPackage('getkirby/amazing-site', '1.0.0.0', '1.0.0');
-        $this->composer->setPackage($rootPackage);
-
-        $package = $this->pluginPackageFactory(false, true);
+        $package = $this->pluginPackageFactory(self::VENDOR_DIR);
         $this->assertEquals($this->testDir . '/vendor/superwoman/superplugin', $this->installer->getInstallPath($package));
         $this->installer->install(new InstalledArrayRepository(), $package);
         $this->assertFileExists($this->testDir . '/vendor/superwoman/superplugin/index.php');
@@ -87,10 +81,7 @@ class PluginInstallerTest extends InstallerTestCase
 
     public function testInstallWithoutVendorDir()
     {
-        $rootPackage = new RootPackage('getkirby/amazing-site', '1.0.0.0', '1.0.0');
-        $this->composer->setPackage($rootPackage);
-
-        $package = $this->pluginPackageFactory(true, false);
+        $package = $this->pluginPackageFactory(self::SUPPORTED);
         $this->assertEquals('site/plugins/superplugin', $this->installer->getInstallPath($package));
         $this->installer->install(new InstalledArrayRepository(), $package);
         $this->assertFileExists($this->testDir . '/site/plugins/superplugin/index.php');
@@ -100,10 +91,7 @@ class PluginInstallerTest extends InstallerTestCase
 
     public function testInstallVendorDir()
     {
-        $rootPackage = new RootPackage('getkirby/amazing-site', '1.0.0.0', '1.0.0');
-        $this->composer->setPackage($rootPackage);
-
-        $package = $this->pluginPackageFactory(true, true);
+        $package = $this->pluginPackageFactory(self::SUPPORTED | self::VENDOR_DIR);
         $this->assertEquals('site/plugins/superplugin', $this->installer->getInstallPath($package));
         $this->installer->install(new InstalledArrayRepository(), $package);
         $this->assertFileExists($this->testDir . '/site/plugins/superplugin/index.php');
@@ -115,10 +103,7 @@ class PluginInstallerTest extends InstallerTestCase
     {
         $repo = new InstalledArrayRepository();
 
-        $rootPackage = new RootPackage('getkirby/amazing-site', '1.0.0.0', '1.0.0');
-        $this->composer->setPackage($rootPackage);
-
-        $initial = $this->pluginPackageFactory(false, true);
+        $initial = $this->pluginPackageFactory(self::VENDOR_DIR);
         $this->assertEquals($this->testDir . '/vendor/superwoman/superplugin', $this->installer->getInstallPath($initial));
         $this->installer->install($repo, $initial);
         $repo->addPackage($initial);
@@ -126,10 +111,12 @@ class PluginInstallerTest extends InstallerTestCase
         $this->assertFileExists($this->testDir . '/vendor/superwoman/superplugin/vendor-created.txt');
         $this->assertDirectoryExists($this->testDir . '/vendor/superwoman/superplugin/vendor');
 
-        unlink($this->testDir . '/vendor/superwoman/superplugin/index.php');
+        $this->filesystem->emptyDirectory($this->testDir . '/vendor/superwoman/superplugin');
         $this->assertFileNotExists($this->testDir . '/vendor/superwoman/superplugin/index.php');
+        $this->assertFileNotExists($this->testDir . '/vendor/superwoman/superplugin/vendor-created.txt');
+        $this->assertDirectoryNotExists($this->testDir . '/vendor/superwoman/superplugin/vendor');
 
-        $target = $this->pluginPackageFactory(false, true);
+        $target = $this->pluginPackageFactory(self::VENDOR_DIR);
         $this->assertEquals($this->testDir . '/vendor/superwoman/superplugin', $this->installer->getInstallPath($target));
         $this->installer->update($repo, $initial, $target);
         $this->assertFileExists($this->testDir . '/vendor/superwoman/superplugin/index.php');
@@ -141,10 +128,7 @@ class PluginInstallerTest extends InstallerTestCase
     {
         $repo = new InstalledArrayRepository();
 
-        $rootPackage = new RootPackage('getkirby/amazing-site', '1.0.0.0', '1.0.0');
-        $this->composer->setPackage($rootPackage);
-
-        $initial = $this->pluginPackageFactory(true, false);
+        $initial = $this->pluginPackageFactory(self::SUPPORTED);
         $this->assertEquals('site/plugins/superplugin', $this->installer->getInstallPath($initial));
         $this->installer->install($repo, $initial);
         $repo->addPackage($initial);
@@ -152,10 +136,12 @@ class PluginInstallerTest extends InstallerTestCase
         $this->assertFileNotExists($this->testDir . '/site/plugins/superplugin/vendor-created.txt');
         $this->assertDirectoryNotExists($this->testDir . '/site/plugins/superplugin/vendor');
 
-        unlink($this->testDir . '/site/plugins/superplugin/index.php');
+        $this->filesystem->emptyDirectory($this->testDir . '/site/plugins/superplugin');
         $this->assertFileNotExists($this->testDir . '/site/plugins/superplugin/index.php');
+        $this->assertFileNotExists($this->testDir . '/site/plugins/superplugin/vendor-created.txt');
+        $this->assertDirectoryNotExists($this->testDir . '/site/plugins/superplugin/vendor');
 
-        $target = $this->pluginPackageFactory(true, false);
+        $target = $this->pluginPackageFactory(self::SUPPORTED);
         $this->assertEquals('site/plugins/superplugin', $this->installer->getInstallPath($target));
         $this->installer->update($repo, $initial, $target);
         $this->assertFileExists($this->testDir . '/site/plugins/superplugin/index.php');
@@ -167,10 +153,7 @@ class PluginInstallerTest extends InstallerTestCase
     {
         $repo = new InstalledArrayRepository();
 
-        $rootPackage = new RootPackage('getkirby/amazing-site', '1.0.0.0', '1.0.0');
-        $this->composer->setPackage($rootPackage);
-
-        $initial = $this->pluginPackageFactory(true, true);
+        $initial = $this->pluginPackageFactory(self::SUPPORTED | self::VENDOR_DIR);
         $this->assertEquals('site/plugins/superplugin', $this->installer->getInstallPath($initial));
         $this->installer->install($repo, $initial);
         $repo->addPackage($initial);
@@ -178,10 +161,12 @@ class PluginInstallerTest extends InstallerTestCase
         $this->assertFileExists($this->testDir . '/site/plugins/superplugin/vendor-created.txt');
         $this->assertDirectoryNotExists($this->testDir . '/site/plugins/superplugin/vendor');
 
-        unlink($this->testDir . '/site/plugins/superplugin/index.php');
+        $this->filesystem->emptyDirectory($this->testDir . '/site/plugins/superplugin');
         $this->assertFileNotExists($this->testDir . '/site/plugins/superplugin/index.php');
+        $this->assertFileNotExists($this->testDir . '/site/plugins/superplugin/vendor-created.txt');
+        $this->assertDirectoryNotExists($this->testDir . '/site/plugins/superplugin/vendor');
 
-        $target = $this->pluginPackageFactory(true, true);
+        $target = $this->pluginPackageFactory(self::SUPPORTED | self::VENDOR_DIR);
         $this->assertEquals('site/plugins/superplugin', $this->installer->getInstallPath($target));
         $this->installer->update($repo, $initial, $target);
         $this->assertFileExists($this->testDir . '/site/plugins/superplugin/index.php');
@@ -192,24 +177,24 @@ class PluginInstallerTest extends InstallerTestCase
     /**
      * Creates a dummy plugin package
      *
-     * @param  bool    $supported Whether the plugin package has required the installer
-     * @param  bool    $vendorDir Whether the plugin has a vendor directory committed
+     * @param  int     $flags Combination of self::SUPPORTED and self::VENDOR_DIR
+     * @param  string  $name  Custom package name of the plugin package
      * @return Package
      */
-    protected function pluginPackageFactory(bool $supported, bool $vendorDir): Package
+    protected function pluginPackageFactory(int $flags = 0, string $name = 'superwoman/superplugin'): Package
     {
-        $package = new Package('superwoman/superplugin', '1.0.0.0', '1.0.0');
+        $package = new Package($name, '1.0.0.0', '1.0.0');
         $package->setType('kirby-plugin');
         $package->setInstallationSource('dist');
         $package->setDistType('mock');
 
-        if ($supported === true) {
+        if ($flags & self::SUPPORTED) {
             $package->setRequires([
                 new Link('superwoman/superplugin', 'getkirby/composer-installer')
             ]);
         }
 
-        if ($vendorDir === true) {
+        if ($flags & self::VENDOR_DIR) {
             $package->setExtra([
                 'with-vendor-dir' => true
             ]);

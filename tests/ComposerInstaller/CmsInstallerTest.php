@@ -3,7 +3,6 @@
 namespace Kirby\ComposerInstaller;
 
 use Composer\Package\Package;
-use Composer\Package\RootPackage;
 use Composer\Repository\InstalledArrayRepository;
 
 class CmsInstallerTest extends InstallerTestCase
@@ -30,11 +29,9 @@ class CmsInstallerTest extends InstallerTestCase
 
     public function testGetInstallPathCustomPaths()
     {
-        $rootPackage = new RootPackage('getkirby/amazing-site', '1.0.0.0', '1.0.0');
-        $rootPackage->setExtra([
+        $this->initRootPackage()->setExtra([
             'kirby-cms-path' => 'cms'
         ]);
-        $this->composer->setPackage($rootPackage);
 
         $package = $this->cmsPackageFactory();
         $this->assertEquals('cms', $this->installer->getInstallPath($package));
@@ -46,11 +43,9 @@ class CmsInstallerTest extends InstallerTestCase
      */
     public function testGetInstallPathUnsafe1()
     {
-        $rootPackage = new RootPackage('getkirby/amazing-site', '1.0.0.0', '1.0.0');
-        $rootPackage->setExtra([
+        $this->initRootPackage()->setExtra([
             'kirby-cms-path' => '.'
         ]);
-        $this->composer->setPackage($rootPackage);
 
         $package = $this->cmsPackageFactory();
         $this->installer->getInstallPath($package);
@@ -62,16 +57,8 @@ class CmsInstallerTest extends InstallerTestCase
      */
     public function testGetInstallPathUnsafe2()
     {
-        $rootPackage = new RootPackage('getkirby/amazing-site', '1.0.0.0', '1.0.0');
-        $rootPackage->setExtra([
+        $this->initRootPackage()->setExtra([
             'kirby-cms-path' => 'vendor'
-        ]);
-        $this->composer->setPackage($rootPackage);
-
-        $this->composer->getConfig()->merge([
-            'config' => [
-                'vendor-dir' => 'vendor'
-            ]
         ]);
 
         $package = $this->cmsPackageFactory();
@@ -84,11 +71,9 @@ class CmsInstallerTest extends InstallerTestCase
      */
     public function testGetInstallPathUnsafe3()
     {
-        $rootPackage = new RootPackage('getkirby/amazing-site', '1.0.0.0', '1.0.0');
-        $rootPackage->setExtra([
+        $this->initRootPackage()->setExtra([
             'kirby-cms-path' => 'custom-vendor'
         ]);
-        $this->composer->setPackage($rootPackage);
 
         $package = $this->cmsPackageFactory();
         $this->assertEquals('custom-vendor', $this->installer->getInstallPath($package));
@@ -105,9 +90,6 @@ class CmsInstallerTest extends InstallerTestCase
 
     public function testInstall()
     {
-        $rootPackage = new RootPackage('getkirby/amazing-site', '1.0.0.0', '1.0.0');
-        $this->composer->setPackage($rootPackage);
-
         $package = $this->cmsPackageFactory();
         $this->assertEquals('kirby', $this->installer->getInstallPath($package));
         $this->installer->install(new InstalledArrayRepository(), $package);
@@ -116,12 +98,9 @@ class CmsInstallerTest extends InstallerTestCase
         $this->assertDirectoryNotExists($this->testDir . '/kirby/vendor');
     }
 
-    public function testUpdateCode()
+    public function testUpdate()
     {
         $repo = new InstalledArrayRepository();
-
-        $rootPackage = new RootPackage('getkirby/amazing-site', '1.0.0.0', '1.0.0');
-        $this->composer->setPackage($rootPackage);
 
         $initial = $this->cmsPackageFactory();
         $this->assertEquals('kirby', $this->installer->getInstallPath($initial));
@@ -131,8 +110,10 @@ class CmsInstallerTest extends InstallerTestCase
         $this->assertFileExists($this->testDir . '/kirby/vendor-created.txt');
         $this->assertDirectoryNotExists($this->testDir . '/kirby/vendor');
 
-        unlink($this->testDir . '/kirby/index.php');
+        $this->filesystem->emptyDirectory($this->testDir . '/kirby');
         $this->assertFileNotExists($this->testDir . '/kirby/index.php');
+        $this->assertFileNotExists($this->testDir . '/kirby/vendor-created.txt');
+        $this->assertDirectoryNotExists($this->testDir . '/kirby/vendor');
 
         $target = $this->cmsPackageFactory();
         $this->assertEquals('kirby', $this->installer->getInstallPath($target));
@@ -154,7 +135,7 @@ class CmsInstallerTest extends InstallerTestCase
         $package->setInstallationSource('dist');
         $package->setDistType('mock');
         $package->setExtra([
-            'with-vendor-dir' => true
+            'with-vendor-dir' => true // tell the MockDownloader to create a `vendor` dir
         ]);
 
         return $package;

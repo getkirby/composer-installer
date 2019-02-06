@@ -8,15 +8,18 @@ use Composer\Composer;
 use Composer\Config;
 use Composer\Downloader\DownloadManager;
 use Composer\IO\NullIO;
+use Composer\Package\RootPackage;
 use Composer\Util\Filesystem;
 
 class InstallerTestCase extends TestCase
 {
     protected $testDir;
-    protected $io;
+
     protected $composer;
     protected $filesystem;
     protected $installer;
+    protected $io;
+    protected $rootPackage;
 
     public function setUp()
     {
@@ -32,14 +35,25 @@ class InstallerTestCase extends TestCase
         $this->composer->setDownloadManager($downloadManager);
 
         // initialize test dir and switch to it to make relative paths work
-        if (!is_dir($this->testDir)) {
-            $this->filesystem->ensureDirectoryExists($this->testDir);
-        }
+        $this->filesystem->ensureDirectoryExists($this->testDir);
         chdir($this->testDir);
     }
 
     public function tearDown()
     {
         $this->filesystem->removeDirectory($this->testDir);
+    }
+
+    /**
+     * Initializes a root Kirby site package and returns it
+     *
+     * @return RootPackage
+     */
+    public function initRootPackage(): RootPackage
+    {
+        $rootPackage = new RootPackage('getkirby/amazing-site', '1.0.0.0', '1.0.0');
+        $this->composer->setPackage($rootPackage);
+
+        return $rootPackage;
     }
 }

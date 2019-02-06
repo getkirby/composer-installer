@@ -33,7 +33,7 @@ class PluginInstaller extends Installer
     public function getInstallPath(PackageInterface $package): string
     {
         // place into `vendor` directory as usual if Pluginkit is not supported
-        if (!$this->supportsPluginkit($package)) {
+        if ($this->supportsPluginkit($package) !== true) {
             return parent::getInstallPath($package);
         }
 
@@ -73,7 +73,7 @@ class PluginInstaller extends Installer
     protected function postInstall(PackageInterface $package)
     {
         // only continue if Pluginkit is supported
-        if (!$this->supportsPluginkit($package)) {
+        if ($this->supportsPluginkit($package) !== true) {
             return;
         }
 
@@ -82,8 +82,8 @@ class PluginInstaller extends Installer
 
     /**
      * Checks if the package has explicitly required this installer;
-     * otherwise the installer will fall back to the behavior of the LibraryInstaller
-     * (Pluginkit is not yet supported by the plugin)
+     * otherwise (if the Pluginkit is not yet supported by the plugin)
+     * the installer will fall back to the behavior of the LibraryInstaller
      *
      * @param  PackageInterface $package
      * @return bool
