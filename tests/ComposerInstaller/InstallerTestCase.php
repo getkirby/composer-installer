@@ -6,6 +6,7 @@ use PHPUnit\Framework\TestCase;
 
 use Composer\Composer;
 use Composer\Config;
+use Composer\Downloader\DownloadManager;
 use Composer\IO\NullIO;
 use Composer\Util\Filesystem;
 
@@ -19,25 +20,22 @@ class InstallerTestCase extends TestCase
 
     public function setUp()
     {
-        // change to the test dir
         $this->testDir = dirname(__DIR__) . '/tmp';
-        if (!is_dir($this->testDir)) {
-            mkdir($this->testDir);
-        }
-        chdir($this->testDir);
 
         // initialize new Composer instance
         $this->io = new NullIO();
-        $config = new Config();
-        $config->merge([
-            'config' => [
-                'vendor-dir' => $this->testDir . '/vendor'
-            ]
-        ]);
         $this->filesystem = new Filesystem();
         $this->composer = new Composer();
-        $this->composer->setConfig($config);
-        $this->composer->setDownloadManager(new MockDownloadManager($this->io, false, $this->filesystem));
+        $this->composer->setConfig(new Config(false, $this->testDir));
+        $downloadManager = new DownloadManager($this->io, false, $this->filesystem);
+        $downloadManager->setDownloader('mock', new MockDownloader($this->filesystem));
+        $this->composer->setDownloadManager($downloadManager);
+
+        // initialize test dir and switch to it to make relative paths work
+        if (!is_dir($this->testDir)) {
+            $this->filesystem->ensureDirectoryExists($this->testDir);
+        }
+        chdir($this->testDir);
     }
 
     public function tearDown()
