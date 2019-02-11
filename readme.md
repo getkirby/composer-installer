@@ -39,6 +39,23 @@ You might want to use a different installation path. The path can be configured 
 }
 ```
 
+### Disable the installer for the CMS
+
+If you prefer to have the CMS installed to the `vendor` directory, you can disable the custom path entirely:
+
+```js
+{
+  "require": {
+    "getkirby/cms": "^3.0"
+  },
+  "extra": {
+    "kirby-cms-path": false
+  }
+}
+```
+
+Please note that you will need to modify your site's `index.php` to load the `vendor/autoload.php` file instead of Kirby's `bootstrap.php`.
+
 ## Installing plugins
 
 ### Support in published plugins

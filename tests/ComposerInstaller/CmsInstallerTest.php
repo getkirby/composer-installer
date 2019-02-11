@@ -27,7 +27,7 @@ class CmsInstallerTest extends InstallerTestCase
         $this->assertEquals('kirby', $this->installer->getInstallPath($package));
     }
 
-    public function testGetInstallPathCustomPaths()
+    public function testGetInstallPathCustomPath()
     {
         $this->initRootPackage()->setExtra([
             'kirby-cms-path' => 'cms'
@@ -35,6 +35,16 @@ class CmsInstallerTest extends InstallerTestCase
 
         $package = $this->cmsPackageFactory();
         $this->assertEquals('cms', $this->installer->getInstallPath($package));
+    }
+
+    public function testGetInstallPathVendor()
+    {
+        $this->initRootPackage()->setExtra([
+            'kirby-cms-path' => false
+        ]);
+
+        $package = $this->cmsPackageFactory();
+        $this->assertEquals($this->testDir . '/vendor/getkirby/cms', $this->installer->getInstallPath($package));
     }
 
     /**
@@ -96,6 +106,20 @@ class CmsInstallerTest extends InstallerTestCase
         $this->assertFileExists($this->testDir . '/kirby/index.php');
         $this->assertFileExists($this->testDir . '/kirby/vendor-created.txt');
         $this->assertDirectoryNotExists($this->testDir . '/kirby/vendor');
+    }
+
+    public function testInstallVendor()
+    {
+        $this->initRootPackage()->setExtra([
+            'kirby-cms-path' => false
+        ]);
+
+        $package = $this->cmsPackageFactory();
+        $this->assertEquals($this->testDir . '/vendor/getkirby/cms', $this->installer->getInstallPath($package));
+        $this->installer->install(new InstalledArrayRepository(), $package);
+        $this->assertFileExists($this->testDir . '/vendor/getkirby/cms/index.php');
+        $this->assertFileExists($this->testDir . '/vendor/getkirby/cms/vendor-created.txt');
+        $this->assertDirectoryNotExists($this->testDir . '/vendor/getkirby/cms/vendor');
     }
 
     public function testUpdate()
