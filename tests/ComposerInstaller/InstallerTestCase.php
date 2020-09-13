@@ -2,14 +2,13 @@
 
 namespace Kirby\ComposerInstaller;
 
-use PHPUnit\Framework\TestCase;
-
 use Composer\Composer;
 use Composer\Config;
 use Composer\Downloader\DownloadManager;
 use Composer\IO\NullIO;
 use Composer\Package\RootPackage;
 use Composer\Util\Filesystem;
+use PHPUnit\Framework\TestCase;
 
 class InstallerTestCase extends TestCase
 {

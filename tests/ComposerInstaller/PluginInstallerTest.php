@@ -177,8 +177,8 @@ class PluginInstallerTest extends InstallerTestCase
     /**
      * Creates a dummy plugin package
      *
-     * @param  int     $flags Combination of self::SUPPORTED and self::VENDOR_DIR
-     * @param  string  $name  Custom package name of the plugin package
+     * @param int $flags Combination of self::SUPPORTED and self::VENDOR_DIR
+     * @param string $name Custom package name of the plugin package
      * @return Package
      */
     protected function pluginPackageFactory(int $flags = 0, string $name = 'superwoman/superplugin'): Package

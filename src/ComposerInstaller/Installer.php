@@ -2,24 +2,24 @@
 
 namespace Kirby\ComposerInstaller;
 
-use RuntimeException;
 use Composer\Installer\LibraryInstaller;
 use Composer\Package\PackageInterface;
 use Composer\Repository\InstalledRepositoryInterface;
+use RuntimeException;
 
 /**
  * @package   Kirby Composer Installer
  * @author    Lukas Bestle <lukas@getkirby.com>
  * @link      https://getkirby.com
- * @copyright Bastian Allgeier
- * @license   MIT
+ * @copyright Bastian Allgeier GmbH
+ * @license   https://opensource.org/licenses/MIT
  */
 class Installer extends LibraryInstaller
 {
     /**
      * Decides if the installer supports the given type
      *
-     * @param  string $packageType
+     * @param string $packageType
      * @return bool
      */
     public function supports($packageType): bool
@@ -30,8 +30,8 @@ class Installer extends LibraryInstaller
     /**
      * Installs specific package.
      *
-     * @param InstalledRepositoryInterface $repo    repository in which to check
-     * @param PackageInterface             $package package instance
+     * @param InstalledRepositoryInterface $repo repository in which to check
+     * @param PackageInterface $package package instance
      */
     public function install(InstalledRepositoryInterface $repo, PackageInterface $package)
     {
@@ -45,9 +45,9 @@ class Installer extends LibraryInstaller
     /**
      * Updates specific package.
      *
-     * @param InstalledRepositoryInterface $repo    repository in which to check
-     * @param PackageInterface             $initial already installed package version
-     * @param PackageInterface             $target  updated version
+     * @param InstalledRepositoryInterface $repo repository in which to check
+     * @param PackageInterface $initial already installed package version
+     * @param PackageInterface $target updated version
      *
      * @throws InvalidArgumentException if $initial package is not installed
      */

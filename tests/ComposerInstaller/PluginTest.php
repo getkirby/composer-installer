@@ -2,12 +2,11 @@
 
 namespace Kirby\ComposerInstaller;
 
-use PHPUnit\Framework\TestCase;
-
 use Composer\Composer;
 use Composer\Config;
 use Composer\Installer\InstallationManager;
 use Composer\IO\NullIO;
+use PHPUnit\Framework\TestCase;
 
 class PluginTest extends TestCase
 {

@@ -1,7 +1,19 @@
+# os
 .DS_Store
 
-composer.lock
+# cs fixer
+.php_cs.cache
 
+# editors
+*.sublime-project
+*.sublime-workspace
+/.vscode
+/.idea
+
+# tests
+.phpunit.result.cache
 /tests/coverage
 /tests/tmp
+
+# vendor files
 /vendor

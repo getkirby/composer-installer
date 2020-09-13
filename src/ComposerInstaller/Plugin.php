@@ -10,15 +10,15 @@ use Composer\Plugin\PluginInterface;
  * @package   Kirby Composer Installer
  * @author    Lukas Bestle <lukas@getkirby.com>
  * @link      https://getkirby.com
- * @copyright Bastian Allgeier
- * @license   MIT
+ * @copyright Bastian Allgeier GmbH
+ * @license   https://opensource.org/licenses/MIT
  */
 class Plugin implements PluginInterface
 {
     /**
      * Apply plugin modifications to Composer
      *
-     * @param Composer    $composer
+     * @param Composer $composer
      * @param IOInterface $io
      */
     public function activate(Composer $composer, IOInterface $io)
