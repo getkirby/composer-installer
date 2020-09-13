@@ -4,6 +4,10 @@ php:
   - 7.2
   - 7.3
   - 7.4
+env:
+  # test with both Composer 2 and Composer 1
+  - COMPOSER_COMMAND="install"
+  - COMPOSER_COMMAND="update --prefer-lowest"
 
 before_install:
   # ensure that the Composer config is valid
@@ -12,7 +16,7 @@ before_install:
 install:
   # install Composer packages, will also trigger dump-autoload
   - composer global require -n --ignore-platform-reqs "friendsofphp/php-cs-fixer" "php-coveralls/php-coveralls"
-  - composer install -n --ignore-platform-reqs --no-suggest
+  - composer $COMPOSER_COMMAND -n --ignore-platform-reqs --no-suggest
 
   # list all package versions
   - composer show

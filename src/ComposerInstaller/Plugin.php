@@ -27,4 +27,28 @@ class Plugin implements PluginInterface
         $installationManager->addInstaller(new CmsInstaller($io, $composer));
         $installationManager->addInstaller(new PluginInstaller($io, $composer));
     }
+
+    /**
+     * Remove any hooks from Composer
+     * @codeCoverageIgnore
+     *
+     * @param Composer $composer
+     * @param IOInterface $io
+     */
+    public function deactivate(Composer $composer, IOInterface $io)
+    {
+        // nothing to do
+    }
+
+    /**
+     * Prepare the plugin to be uninstalled
+     * @codeCoverageIgnore
+     *
+     * @param Composer $composer
+     * @param IOInterface $io
+     */
+    public function uninstall(Composer $composer, IOInterface $io)
+    {
+        // nothing to do
+    }
 }

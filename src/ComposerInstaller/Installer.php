@@ -5,6 +5,7 @@ namespace Kirby\ComposerInstaller;
 use Composer\Installer\LibraryInstaller;
 use Composer\Package\PackageInterface;
 use Composer\Repository\InstalledRepositoryInterface;
+use React\Promise\PromiseInterface;
 use RuntimeException;
 
 /**
@@ -36,10 +37,20 @@ class Installer extends LibraryInstaller
     public function install(InstalledRepositoryInterface $repo, PackageInterface $package)
     {
         // first install the package normally...
-        parent::install($repo, $package);
+        $promise = parent::install($repo, $package);
 
         // ...then run custom code
-        $this->postInstall($package);
+        $postInstall = function () use ($package) {
+            $this->postInstall($package);
+        };
+
+        // Composer 2 in async mode
+        if ($promise instanceof PromiseInterface) {
+            return $promise->then($postInstall);
+        }
+
+        // Composer 1 or Composer 2 without async
+        $postInstall();
     }
 
     /**
@@ -54,10 +65,20 @@ class Installer extends LibraryInstaller
     public function update(InstalledRepositoryInterface $repo, PackageInterface $initial, PackageInterface $target)
     {
         // first update the package normally...
-        parent::update($repo, $initial, $target);
+        $promise = parent::update($repo, $initial, $target);
 
         // ...then run custom code
-        $this->postInstall($target);
+        $postInstall = function () use ($target) {
+            $this->postInstall($target);
+        };
+
+        // Composer 2 in async mode
+        if ($promise instanceof PromiseInterface) {
+            return $promise->then($postInstall);
+        }
+
+        // Composer 1 or Composer 2 without async
+        $postInstall();
     }
 
     /**

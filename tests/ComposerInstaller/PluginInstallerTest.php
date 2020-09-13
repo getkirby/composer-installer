@@ -5,6 +5,7 @@ namespace Kirby\ComposerInstaller;
 use Composer\Package\Link;
 use Composer\Package\Package;
 use Composer\Repository\InstalledArrayRepository;
+use Composer\Semver\Constraint\Constraint;
 
 class PluginInstallerTest extends InstallerTestCase
 {
@@ -189,8 +190,9 @@ class PluginInstallerTest extends InstallerTestCase
         $package->setDistType('mock');
 
         if ($flags & self::SUPPORTED) {
+            $constraint = new Constraint('==', '1.0.0');
             $package->setRequires([
-                new Link('superwoman/superplugin', 'getkirby/composer-installer')
+                new Link('superwoman/superplugin', 'getkirby/composer-installer', $constraint)
             ]);
         }
 
