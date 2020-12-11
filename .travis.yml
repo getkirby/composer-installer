@@ -15,7 +15,7 @@ before_install:
 
 install:
   # install Composer packages, will also trigger dump-autoload
-  - composer global require -n --ignore-platform-reqs "friendsofphp/php-cs-fixer" "php-coveralls/php-coveralls"
+  - composer require -n --ignore-platform-reqs "friendsofphp/php-cs-fixer" "php-coveralls/php-coveralls"
   - composer $COMPOSER_COMMAND -n --ignore-platform-reqs --no-suggest
 
   # list all package versions
@@ -27,10 +27,10 @@ before_script:
 
 script:
   - ./vendor/bin/phpunit --coverage-clover build/logs/clover.xml
-  - PHP_CS_FIXER_IGNORE_ENV=1 ~/.composer/vendor/bin/php-cs-fixer fix --config .php_cs --verbose --diff --dry-run
+  - PHP_CS_FIXER_IGNORE_ENV=1 ./vendor/bin/php-cs-fixer fix --config .php_cs --verbose --diff --dry-run
 
 after_success:
-  - travis_retry ~/.composer/vendor/bin/php-coveralls -v
+  - travis_retry ./vendor/bin/php-coveralls -v
 
 cache:
   directories:
