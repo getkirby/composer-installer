@@ -27,7 +27,7 @@ class PluginInstaller extends Installer
     /**
      * Returns the installation path of a package
      *
-     * @param PackageInterface $package
+     * @param \Composer\Package\PackageInterface $package
      * @return string path
      */
     public function getInstallPath(PackageInterface $package): string
@@ -68,9 +68,10 @@ class PluginInstaller extends Installer
      * Custom handler that will be called after each package
      * installation or update
      *
-     * @param PackageInterface $package
+     * @param \Composer\Package\PackageInterface $package
+     * @return void
      */
-    protected function postInstall(PackageInterface $package)
+    protected function postInstall(PackageInterface $package): void
     {
         // only continue if Pluginkit is supported
         if ($this->supportsPluginkit($package) !== true) {
@@ -85,7 +86,7 @@ class PluginInstaller extends Installer
      * otherwise (if the Pluginkit is not yet supported by the plugin)
      * the installer will fall back to the behavior of the LibraryInstaller
      *
-     * @param PackageInterface $package
+     * @param \Composer\Package\PackageInterface $package
      * @return bool
      */
     protected function supportsPluginkit(PackageInterface $package): bool

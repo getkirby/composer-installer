@@ -29,8 +29,8 @@ class CmsInstaller extends Installer
     /**
      * Returns the installation path of a package
      *
-     * @param PackageInterface $package
-     * @return string path
+     * @param \Composer\Package\PackageInterface $package
+     * @return string
      */
     public function getInstallPath(PackageInterface $package): string
     {
