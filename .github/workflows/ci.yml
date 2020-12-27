@@ -1,0 +1,103 @@
+name: CI
+on: [push, pull_request]
+
+jobs:
+  tests:
+    name: PHP ${{ matrix.php }} with Composer ${{ matrix.composer }}
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: [ "7.3", "7.4", "8.0" ]
+        composer: [ "1", "2" ]
+
+    steps:
+      - name: Checkout Composer Installer
+        uses: actions/checkout@v2
+
+      - name: Setup PHP environment
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: pcov
+          tools: phpunit:^9, composer:v2
+
+      - name: Setup problem matchers
+        run: |
+          echo "::add-matcher::${{ runner.tool_cache }}/php.json"
+          echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
+
+      - name: Validate Composer config
+        run: composer validate
+
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ matrix.composer }}-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-${{ matrix.composer }}-
+
+      - name: Install dependencies
+        run: |
+          # install the lowest or highest versions based on the matrix config
+          command=$([ "${{ matrix.composer }}" == 1 ] && echo "update --prefer-lowest" || echo "install")
+          composer $command --prefer-dist
+
+      - name: Run tests
+        run: phpunit --coverage-clover ${{ github.workspace }}/clover.xml
+
+      - name: Upload coverage results to Coveralls
+        env:
+          COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COVERALLS_PARALLEL: "true"
+          COVERALLS_FLAG_NAME: ${{ matrix.php }}
+        run: |
+          composer global require -n -q php-coveralls/php-coveralls
+          php-coveralls --coverage_clover=${{ github.workspace }}/clover.xml -o ${{ github.workspace }}/coveralls.json -v
+
+  backend-analysis:
+    name: Backend Analysis
+
+    runs-on: ubuntu-latest
+    env:
+      php: "7.4"
+
+    steps:
+      - name: Checkout Composer Installer
+        uses: actions/checkout@v2
+
+      - name: Setup PHP environment
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.php }}
+          coverage: none
+          tools: php-cs-fixer, cs2pr
+
+      - name: Cache analysis data
+        uses: actions/cache@v2
+        with:
+          path: ~/.php-cs-fixer
+          key: backend-analysis
+
+      - name: Run tests
+        env:
+          PHP_CS_FIXER_IGNORE_ENV: 1
+        run: |
+          php-cs-fixer fix --dry-run --format=checkstyle | cs2pr
+
+  coveralls-upload:
+    name: Coveralls Upload
+
+    needs: tests
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Send the Coveralls Finished webhook
+      uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        parallel-finished: true
