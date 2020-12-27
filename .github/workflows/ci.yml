@@ -27,9 +27,6 @@ jobs:
           echo "::add-matcher::${{ runner.tool_cache }}/php.json"
           echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
 
-      - name: Validate Composer config
-        run: composer validate
-
       - name: Get Composer cache directory
         id: composer-cache
         run: echo "::set-output name=dir::$(composer config cache-files-dir)"
@@ -75,19 +72,41 @@ jobs:
         with:
           php-version: ${{ env.php }}
           coverage: none
-          tools: php-cs-fixer, cs2pr
+          tools: composer:v2, php-cs-fixer, cs2pr, psalm
+
+      - name: Validate Composer config
+        run: composer validate
+
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ matrix.composer }}-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-${{ matrix.composer }}-
+
+      - name: Install dependencies
+        run: composer install --prefer-dist
 
       - name: Cache analysis data
         uses: actions/cache@v2
         with:
-          path: ~/.php-cs-fixer
+          path: |
+            ~/.php-cs-fixer
+            ~/.cache/psalm
           key: backend-analysis
 
-      - name: Run tests
+      - name: Run PHP-CS-Fixer
         env:
           PHP_CS_FIXER_IGNORE_ENV: 1
         run: |
           php-cs-fixer fix --dry-run --format=checkstyle | cs2pr
+
+      - name: Run Psalm
+        run: psalm --output-format=github
 
   coveralls-upload:
     name: Coveralls Upload
