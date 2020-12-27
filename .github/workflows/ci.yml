@@ -51,7 +51,7 @@ jobs:
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COVERALLS_PARALLEL: "true"
-          COVERALLS_FLAG_NAME: ${{ matrix.php }}
+          COVERALLS_FLAG_NAME: ${{ matrix.php }}-${{ matrix.composer }}
         run: |
           composer global require -n -q php-coveralls/php-coveralls
           php-coveralls --coverage_clover=${{ github.workspace }}/clover.xml -o ${{ github.workspace }}/coveralls.json -v
