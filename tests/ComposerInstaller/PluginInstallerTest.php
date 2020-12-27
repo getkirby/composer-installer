@@ -12,7 +12,7 @@ class PluginInstallerTest extends InstallerTestCase
     const SUPPORTED  = 1;
     const VENDOR_DIR = 2;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -86,8 +86,8 @@ class PluginInstallerTest extends InstallerTestCase
         $this->assertEquals('site/plugins/superplugin', $this->installer->getInstallPath($package));
         $this->installer->install(new InstalledArrayRepository(), $package);
         $this->assertFileExists($this->testDir . '/site/plugins/superplugin/index.php');
-        $this->assertFileNotExists($this->testDir . '/site/plugins/superplugin/vendor-created.txt');
-        $this->assertDirectoryNotExists($this->testDir . '/site/plugins/superplugin/vendor');
+        $this->assertFileDoesNotExist($this->testDir . '/site/plugins/superplugin/vendor-created.txt');
+        $this->assertDirectoryDoesNotExist($this->testDir . '/site/plugins/superplugin/vendor');
     }
 
     public function testInstallVendorDir()
@@ -97,7 +97,7 @@ class PluginInstallerTest extends InstallerTestCase
         $this->installer->install(new InstalledArrayRepository(), $package);
         $this->assertFileExists($this->testDir . '/site/plugins/superplugin/index.php');
         $this->assertFileExists($this->testDir . '/site/plugins/superplugin/vendor-created.txt');
-        $this->assertDirectoryNotExists($this->testDir . '/site/plugins/superplugin/vendor');
+        $this->assertDirectoryDoesNotExist($this->testDir . '/site/plugins/superplugin/vendor');
     }
 
     public function testUpdateNoSupport()
@@ -113,9 +113,9 @@ class PluginInstallerTest extends InstallerTestCase
         $this->assertDirectoryExists($this->testDir . '/vendor/superwoman/superplugin/vendor');
 
         $this->filesystem->emptyDirectory($this->testDir . '/vendor/superwoman/superplugin');
-        $this->assertFileNotExists($this->testDir . '/vendor/superwoman/superplugin/index.php');
-        $this->assertFileNotExists($this->testDir . '/vendor/superwoman/superplugin/vendor-created.txt');
-        $this->assertDirectoryNotExists($this->testDir . '/vendor/superwoman/superplugin/vendor');
+        $this->assertFileDoesNotExist($this->testDir . '/vendor/superwoman/superplugin/index.php');
+        $this->assertFileDoesNotExist($this->testDir . '/vendor/superwoman/superplugin/vendor-created.txt');
+        $this->assertDirectoryDoesNotExist($this->testDir . '/vendor/superwoman/superplugin/vendor');
 
         $target = $this->pluginPackageFactory(self::VENDOR_DIR);
         $this->assertEquals($this->testDir . '/vendor/superwoman/superplugin', $this->installer->getInstallPath($target));
@@ -134,20 +134,20 @@ class PluginInstallerTest extends InstallerTestCase
         $this->installer->install($repo, $initial);
         $repo->addPackage($initial);
         $this->assertFileExists($this->testDir . '/site/plugins/superplugin/index.php');
-        $this->assertFileNotExists($this->testDir . '/site/plugins/superplugin/vendor-created.txt');
-        $this->assertDirectoryNotExists($this->testDir . '/site/plugins/superplugin/vendor');
+        $this->assertFileDoesNotExist($this->testDir . '/site/plugins/superplugin/vendor-created.txt');
+        $this->assertDirectoryDoesNotExist($this->testDir . '/site/plugins/superplugin/vendor');
 
         $this->filesystem->emptyDirectory($this->testDir . '/site/plugins/superplugin');
-        $this->assertFileNotExists($this->testDir . '/site/plugins/superplugin/index.php');
-        $this->assertFileNotExists($this->testDir . '/site/plugins/superplugin/vendor-created.txt');
-        $this->assertDirectoryNotExists($this->testDir . '/site/plugins/superplugin/vendor');
+        $this->assertFileDoesNotExist($this->testDir . '/site/plugins/superplugin/index.php');
+        $this->assertFileDoesNotExist($this->testDir . '/site/plugins/superplugin/vendor-created.txt');
+        $this->assertDirectoryDoesNotExist($this->testDir . '/site/plugins/superplugin/vendor');
 
         $target = $this->pluginPackageFactory(self::SUPPORTED);
         $this->assertEquals('site/plugins/superplugin', $this->installer->getInstallPath($target));
         $this->installer->update($repo, $initial, $target);
         $this->assertFileExists($this->testDir . '/site/plugins/superplugin/index.php');
-        $this->assertFileNotExists($this->testDir . '/site/plugins/superplugin/vendor-created.txt');
-        $this->assertDirectoryNotExists($this->testDir . '/site/plugins/superplugin/vendor');
+        $this->assertFileDoesNotExist($this->testDir . '/site/plugins/superplugin/vendor-created.txt');
+        $this->assertDirectoryDoesNotExist($this->testDir . '/site/plugins/superplugin/vendor');
     }
 
     public function testUpdateVendorDir()
@@ -160,19 +160,19 @@ class PluginInstallerTest extends InstallerTestCase
         $repo->addPackage($initial);
         $this->assertFileExists($this->testDir . '/site/plugins/superplugin/index.php');
         $this->assertFileExists($this->testDir . '/site/plugins/superplugin/vendor-created.txt');
-        $this->assertDirectoryNotExists($this->testDir . '/site/plugins/superplugin/vendor');
+        $this->assertDirectoryDoesNotExist($this->testDir . '/site/plugins/superplugin/vendor');
 
         $this->filesystem->emptyDirectory($this->testDir . '/site/plugins/superplugin');
-        $this->assertFileNotExists($this->testDir . '/site/plugins/superplugin/index.php');
-        $this->assertFileNotExists($this->testDir . '/site/plugins/superplugin/vendor-created.txt');
-        $this->assertDirectoryNotExists($this->testDir . '/site/plugins/superplugin/vendor');
+        $this->assertFileDoesNotExist($this->testDir . '/site/plugins/superplugin/index.php');
+        $this->assertFileDoesNotExist($this->testDir . '/site/plugins/superplugin/vendor-created.txt');
+        $this->assertDirectoryDoesNotExist($this->testDir . '/site/plugins/superplugin/vendor');
 
         $target = $this->pluginPackageFactory(self::SUPPORTED | self::VENDOR_DIR);
         $this->assertEquals('site/plugins/superplugin', $this->installer->getInstallPath($target));
         $this->installer->update($repo, $initial, $target);
         $this->assertFileExists($this->testDir . '/site/plugins/superplugin/index.php');
         $this->assertFileExists($this->testDir . '/site/plugins/superplugin/vendor-created.txt');
-        $this->assertDirectoryNotExists($this->testDir . '/site/plugins/superplugin/vendor');
+        $this->assertDirectoryDoesNotExist($this->testDir . '/site/plugins/superplugin/vendor');
     }
 
     /**

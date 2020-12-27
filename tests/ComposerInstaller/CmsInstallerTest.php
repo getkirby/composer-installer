@@ -7,7 +7,7 @@ use Composer\Repository\InstalledArrayRepository;
 
 class CmsInstallerTest extends InstallerTestCase
 {
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -47,12 +47,11 @@ class CmsInstallerTest extends InstallerTestCase
         $this->assertEquals($this->testDir . '/vendor/getkirby/cms', $this->installer->getInstallPath($package));
     }
 
-    /**
-     * @expectedException        InvalidArgumentException
-     * @expectedExceptionMessage The path . is an unsafe installation directory for getkirby/cms.
-     */
     public function testGetInstallPathUnsafe1()
     {
+        $this->expectException('InvalidArgumentException');
+        $this->expectExceptionMessage('The path . is an unsafe installation directory for getkirby/cms.');
+
         $this->initRootPackage()->setExtra([
             'kirby-cms-path' => '.'
         ]);
@@ -61,12 +60,11 @@ class CmsInstallerTest extends InstallerTestCase
         $this->installer->getInstallPath($package);
     }
 
-    /**
-     * @expectedException        InvalidArgumentException
-     * @expectedExceptionMessage The path vendor is an unsafe installation directory for getkirby/cms.
-     */
     public function testGetInstallPathUnsafe2()
     {
+        $this->expectException('InvalidArgumentException');
+        $this->expectExceptionMessage('The path vendor is an unsafe installation directory for getkirby/cms.');
+
         $this->initRootPackage()->setExtra([
             'kirby-cms-path' => 'vendor'
         ]);
@@ -75,12 +73,11 @@ class CmsInstallerTest extends InstallerTestCase
         $this->installer->getInstallPath($package);
     }
 
-    /**
-     * @expectedException        InvalidArgumentException
-     * @expectedExceptionMessage The path custom-vendor is an unsafe installation directory for getkirby/cms.
-     */
     public function testGetInstallPathUnsafe3()
     {
+        $this->expectException('InvalidArgumentException');
+        $this->expectExceptionMessage('The path custom-vendor is an unsafe installation directory for getkirby/cms.');
+
         $this->initRootPackage()->setExtra([
             'kirby-cms-path' => 'custom-vendor'
         ]);
@@ -105,7 +102,7 @@ class CmsInstallerTest extends InstallerTestCase
         $this->installer->install(new InstalledArrayRepository(), $package);
         $this->assertFileExists($this->testDir . '/kirby/index.php');
         $this->assertFileExists($this->testDir . '/kirby/vendor-created.txt');
-        $this->assertDirectoryNotExists($this->testDir . '/kirby/vendor');
+        $this->assertDirectoryDoesNotExist($this->testDir . '/kirby/vendor');
     }
 
     public function testInstallVendor()
@@ -119,7 +116,7 @@ class CmsInstallerTest extends InstallerTestCase
         $this->installer->install(new InstalledArrayRepository(), $package);
         $this->assertFileExists($this->testDir . '/vendor/getkirby/cms/index.php');
         $this->assertFileExists($this->testDir . '/vendor/getkirby/cms/vendor-created.txt');
-        $this->assertDirectoryNotExists($this->testDir . '/vendor/getkirby/cms/vendor');
+        $this->assertDirectoryDoesNotExist($this->testDir . '/vendor/getkirby/cms/vendor');
     }
 
     public function testUpdate()
@@ -132,19 +129,19 @@ class CmsInstallerTest extends InstallerTestCase
         $repo->addPackage($initial);
         $this->assertFileExists($this->testDir . '/kirby/index.php');
         $this->assertFileExists($this->testDir . '/kirby/vendor-created.txt');
-        $this->assertDirectoryNotExists($this->testDir . '/kirby/vendor');
+        $this->assertDirectoryDoesNotExist($this->testDir . '/kirby/vendor');
 
         $this->filesystem->emptyDirectory($this->testDir . '/kirby');
-        $this->assertFileNotExists($this->testDir . '/kirby/index.php');
-        $this->assertFileNotExists($this->testDir . '/kirby/vendor-created.txt');
-        $this->assertDirectoryNotExists($this->testDir . '/kirby/vendor');
+        $this->assertFileDoesNotExist($this->testDir . '/kirby/index.php');
+        $this->assertFileDoesNotExist($this->testDir . '/kirby/vendor-created.txt');
+        $this->assertDirectoryDoesNotExist($this->testDir . '/kirby/vendor');
 
         $target = $this->cmsPackageFactory();
         $this->assertEquals('kirby', $this->installer->getInstallPath($target));
         $this->installer->update($repo, $initial, $target);
         $this->assertFileExists($this->testDir . '/kirby/index.php');
         $this->assertFileExists($this->testDir . '/kirby/vendor-created.txt');
-        $this->assertDirectoryNotExists($this->testDir . '/kirby/vendor');
+        $this->assertDirectoryDoesNotExist($this->testDir . '/kirby/vendor');
     }
 
     /**
