@@ -1,0 +1,35 @@
+<?php
+
+namespace Composer
+{
+    class Config
+    {
+        /**
+         * Returns a setting
+         *
+         * @template T as string
+         * @param T $key
+         * @param int $flags
+         * @psalm-return (T is 'vendor-dir' ? string|null : mixed)
+         */
+        public function get($key, $flags = 0)
+        { 
+        }
+    }
+}
+
+namespace Composer\Installer
+{
+    class LibraryInstaller
+    {
+        /**
+         * @var \Composer\Composer
+         */
+        protected $composer;
+
+        /**
+         * @var \Composer\Util\Filesystem
+         */
+        protected $filesystem;
+    }
+}

@@ -94,9 +94,10 @@ class Installer extends LibraryInstaller
     {
         // remove the package's `vendor` directory to avoid duplicated autoloader and vendor code
         $packageVendorDir = $this->getInstallPath($package) . '/vendor';
-        if (is_dir($packageVendorDir)) {
+        if (is_dir($packageVendorDir) === true) {
             $success = $this->filesystem->removeDirectory($packageVendorDir);
-            if (!$success) {
+
+            if ($success !== true) {
                 throw new RuntimeException('Could not completely delete ' . $packageVendorDir . ', aborting.'); // @codeCoverageIgnore
             }
         }

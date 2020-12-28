@@ -70,6 +70,35 @@ class PluginInstallerTest extends InstallerTestCase
         $this->assertEquals('data/plugins/another-name', $this->installer->getInstallPath($package));
     }
 
+    public function testGetInstallPathInvalidPluginPath()
+    {
+        $this->expectException('InvalidArgumentException');
+        $this->expectExceptionMessage('Invalid "kirby-plugin-path" option');
+
+        $this->initRootPackage()->setExtra([
+            'kirby-plugin-path' => false
+        ]);
+
+        $package = $this->pluginPackageFactory(self::SUPPORTED);
+        $this->installer->getInstallPath($package);
+    }
+
+    public function testGetInstallPathInvalidInstallerName()
+    {
+        $this->expectException('InvalidArgumentException');
+        $this->expectExceptionMessage('Invalid "installer-name" option in plugin superwoman/superplugin');
+
+        $this->initRootPackage()->setExtra([
+            'kirby-plugin-path' => 'data/plugins'
+        ]);
+
+        $package = $this->pluginPackageFactory(self::SUPPORTED);
+        $package->setExtra([
+            'installer-name' => true
+        ]);
+        $this->installer->getInstallPath($package);
+    }
+
     public function testInstallNoSupport()
     {
         $package = $this->pluginPackageFactory(self::VENDOR_DIR);
