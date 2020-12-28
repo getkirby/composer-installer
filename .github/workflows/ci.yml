@@ -96,6 +96,7 @@ jobs:
         run: composer install --prefer-dist
 
       - name: Cache analysis data
+        id: finishPrepare
         uses: actions/cache@v2
         with:
           path: |
@@ -104,12 +105,14 @@ jobs:
           key: backend-analysis
 
       - name: Run PHP-CS-Fixer
+        if: always() && steps.finishPrepare.outcome == 'success'
         env:
           PHP_CS_FIXER_IGNORE_ENV: 1
         run: |
           php-cs-fixer fix --dry-run --format=checkstyle | cs2pr
 
       - name: Run Psalm
+        if: always() && steps.finishPrepare.outcome == 'success'
         run: psalm --output-format=github
 
   coveralls-upload:
