@@ -3,10 +3,11 @@
 .gitignore export-ignore
 
 # Testing files
-.coveralls.yml export-ignore
+.github/ export-ignore
 .php_cs export-ignore
 .travis.yml export-ignore
 phpunit.xml.dist export-ignore
+psalm.xml export-ignore
 tests/ export-ignore
 
 # Other dotfiles
