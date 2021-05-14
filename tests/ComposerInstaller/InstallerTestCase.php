@@ -12,13 +12,12 @@ use PHPUnit\Framework\TestCase;
 
 class InstallerTestCase extends TestCase
 {
-    protected $testDir;
-
     protected $composer;
     protected $filesystem;
     protected $installer;
     protected $io;
     protected $rootPackage;
+    protected $testDir;
 
     public function setUp(): void
     {

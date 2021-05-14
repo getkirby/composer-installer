@@ -16,17 +16,6 @@ use InvalidArgumentException;
 class CmsInstaller extends Installer
 {
     /**
-     * Decides if the installer supports the given type
-     *
-     * @param string $packageType
-     * @return bool
-     */
-    public function supports($packageType): bool
-    {
-        return $packageType === 'kirby-cms';
-    }
-
-    /**
      * Returns the installation path of a package
      *
      * @param \Composer\Package\PackageInterface $package
@@ -34,11 +23,13 @@ class CmsInstaller extends Installer
      */
     public function getInstallPath(PackageInterface $package): string
     {
+        /** @var \Composer\Package\RootPackageInterface|null $rootPackage */
+        $rootPackage = $this->composer->getPackage();
+
         // get the extra configuration of the top-level package
-        if ($rootPackage = $this->composer->getPackage()) {
+        $extra = [];
+        if ($rootPackage) {
             $extra = $rootPackage->getExtra();
-        } else {
-            $extra = [];
         }
 
         // use path from configuration, otherwise fall back to default
@@ -60,5 +51,16 @@ class CmsInstaller extends Installer
         }
 
         return $path;
+    }
+
+    /**
+     * Decides if the installer supports the given type
+     *
+     * @param string $packageType
+     * @return bool
+     */
+    public function supports($packageType): bool
+    {
+        return $packageType === 'kirby-cms';
     }
 }

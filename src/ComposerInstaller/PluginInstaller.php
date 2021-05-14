@@ -15,17 +15,6 @@ use InvalidArgumentException;
 class PluginInstaller extends Installer
 {
     /**
-     * Decides if the installer supports the given type
-     *
-     * @param string $packageType
-     * @return bool
-     */
-    public function supports($packageType): bool
-    {
-        return $packageType === 'kirby-plugin';
-    }
-
-    /**
      * Returns the installation path of a package
      *
      * @param \Composer\Package\PackageInterface $package
@@ -38,11 +27,13 @@ class PluginInstaller extends Installer
             return parent::getInstallPath($package);
         }
 
+        /** @var \Composer\Package\RootPackageInterface|null $rootPackage */
+        $rootPackage = $this->composer->getPackage();
+
         // get the extra configuration of the top-level package
-        if ($rootPackage = $this->composer->getPackage()) {
+        $extra = [];
+        if ($rootPackage) {
             $extra = $rootPackage->getExtra();
-        } else {
-            $extra = [];
         }
 
         // use base path from configuration, otherwise fall back to default
@@ -71,6 +62,17 @@ class PluginInstaller extends Installer
 
         // build destination path from base path and plugin name
         return $basePath . '/' . $name;
+    }
+
+    /**
+     * Decides if the installer supports the given type
+     *
+     * @param string $packageType
+     * @return bool
+     */
+    public function supports($packageType): bool
+    {
+        return $packageType === 'kirby-plugin';
     }
 
     /**

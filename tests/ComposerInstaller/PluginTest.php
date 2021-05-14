@@ -34,9 +34,9 @@ class PluginTest extends TestCase
         $plugin->activate($composer, $io);
 
         $installer = $installationManager->getInstaller('kirby-cms');
-        $this->assertInstanceOf(CmsInstaller::class, $installer);
+        $this->assertInstanceOf('Kirby\ComposerInstaller\CmsInstaller', $installer);
 
         $installer = $installationManager->getInstaller('kirby-plugin');
-        $this->assertInstanceOf(PluginInstaller::class, $installer);
+        $this->assertInstanceOf('Kirby\ComposerInstaller\PluginInstaller', $installer);
     }
 }

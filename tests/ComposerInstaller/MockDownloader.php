@@ -16,9 +16,9 @@ class MockDownloader implements DownloaderInterface
         $this->filesystem = $filesystem;
     }
 
-    public function getInstallationSource()
+    public function cleanup($type, PackageInterface $package, $path, ?PackageInterface $prevPackage = null)
     {
-        return 'dist';
+        // do nothing (not needed for testing)
     }
 
     public function download(PackageInterface $package, $path, ?PackageInterface $prevPackage = null)
@@ -29,9 +29,9 @@ class MockDownloader implements DownloaderInterface
         }
     }
 
-    public function prepare($type, PackageInterface $package, $path, ?PackageInterface $prevPackage = null)
+    public function getInstallationSource()
     {
-        // do nothing (not needed for testing)
+        return 'dist';
     }
 
     public function install(PackageInterface $package, $path)
@@ -48,10 +48,9 @@ class MockDownloader implements DownloaderInterface
         }
     }
 
-    public function update(PackageInterface $initial, PackageInterface $target, $path)
+    public function prepare($type, PackageInterface $package, $path, ?PackageInterface $prevPackage = null)
     {
-        $this->remove($initial, $path);
-        $this->install($target, $path);
+        // do nothing (not needed for testing)
     }
 
     public function remove(PackageInterface $package, $path)
@@ -59,14 +58,15 @@ class MockDownloader implements DownloaderInterface
         $this->filesystem->remove($path);
     }
 
-    public function cleanup($type, PackageInterface $package, $path, ?PackageInterface $prevPackage = null)
-    {
-        // do nothing (not needed for testing)
-    }
-
     public function setOutputProgress($outputProgress)
     {
         // we don't care about that shit
         // only relevant for Composer 1, was removed in Composer 2
+    }
+
+    public function update(PackageInterface $initial, PackageInterface $target, $path)
+    {
+        $this->remove($initial, $path);
+        $this->install($target, $path);
     }
 }

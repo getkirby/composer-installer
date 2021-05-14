@@ -19,41 +19,6 @@ class PluginInstallerTest extends InstallerTestCase
         $this->installer = new PluginInstaller($this->io, $this->composer);
     }
 
-    public function testSupports()
-    {
-        $this->assertTrue($this->installer->supports('kirby-plugin'));
-        $this->assertFalse($this->installer->supports('kirby-cms'));
-        $this->assertFalse($this->installer->supports('amazing-plugin'));
-    }
-
-    public function testGetInstallPathNoSupport()
-    {
-        $package = $this->pluginPackageFactory();
-        $this->assertEquals($this->testDir . '/vendor/superwoman/superplugin', $this->installer->getInstallPath($package));
-    }
-
-    public function testGetInstallPathDefault()
-    {
-        $package = $this->pluginPackageFactory(self::SUPPORTED);
-        $this->assertEquals('site/plugins/superplugin', $this->installer->getInstallPath($package));
-    }
-
-    public function testGetInstallPathNoVendor()
-    {
-        $package = $this->pluginPackageFactory(self::SUPPORTED, 'superplugin');
-        $this->assertEquals('superplugin', $package->getPrettyName());
-        $this->assertEquals('site/plugins/superplugin', $this->installer->getInstallPath($package));
-    }
-
-    public function testGetInstallPathInstallerName()
-    {
-        $package = $this->pluginPackageFactory(self::SUPPORTED);
-        $package->setExtra([
-            'installer-name' => 'another-name'
-        ]);
-        $this->assertEquals('site/plugins/another-name', $this->installer->getInstallPath($package));
-    }
-
     public function testGetInstallPathCustomPaths()
     {
         $this->initRootPackage()->setExtra([
@@ -70,17 +35,19 @@ class PluginInstallerTest extends InstallerTestCase
         $this->assertEquals('data/plugins/another-name', $this->installer->getInstallPath($package));
     }
 
-    public function testGetInstallPathInvalidPluginPath()
+    public function testGetInstallPathDefault()
     {
-        $this->expectException('InvalidArgumentException');
-        $this->expectExceptionMessage('Invalid "kirby-plugin-path" option');
-
-        $this->initRootPackage()->setExtra([
-            'kirby-plugin-path' => false
-        ]);
-
         $package = $this->pluginPackageFactory(self::SUPPORTED);
-        $this->installer->getInstallPath($package);
+        $this->assertEquals('site/plugins/superplugin', $this->installer->getInstallPath($package));
+    }
+
+    public function testGetInstallPathInstallerName()
+    {
+        $package = $this->pluginPackageFactory(self::SUPPORTED);
+        $package->setExtra([
+            'installer-name' => 'another-name'
+        ]);
+        $this->assertEquals('site/plugins/another-name', $this->installer->getInstallPath($package));
     }
 
     public function testGetInstallPathInvalidInstallerName()
@@ -99,6 +66,32 @@ class PluginInstallerTest extends InstallerTestCase
         $this->installer->getInstallPath($package);
     }
 
+    public function testGetInstallPathInvalidPluginPath()
+    {
+        $this->expectException('InvalidArgumentException');
+        $this->expectExceptionMessage('Invalid "kirby-plugin-path" option');
+
+        $this->initRootPackage()->setExtra([
+            'kirby-plugin-path' => false
+        ]);
+
+        $package = $this->pluginPackageFactory(self::SUPPORTED);
+        $this->installer->getInstallPath($package);
+    }
+
+    public function testGetInstallPathNoSupport()
+    {
+        $package = $this->pluginPackageFactory();
+        $this->assertEquals($this->testDir . '/vendor/superwoman/superplugin', $this->installer->getInstallPath($package));
+    }
+
+    public function testGetInstallPathNoVendor()
+    {
+        $package = $this->pluginPackageFactory(self::SUPPORTED, 'superplugin');
+        $this->assertEquals('superplugin', $package->getPrettyName());
+        $this->assertEquals('site/plugins/superplugin', $this->installer->getInstallPath($package));
+    }
+
     public function testInstallNoSupport()
     {
         $package = $this->pluginPackageFactory(self::VENDOR_DIR);
@@ -107,6 +100,16 @@ class PluginInstallerTest extends InstallerTestCase
         $this->assertFileExists($this->testDir . '/vendor/superwoman/superplugin/index.php');
         $this->assertFileExists($this->testDir . '/vendor/superwoman/superplugin/vendor-created.txt');
         $this->assertDirectoryExists($this->testDir . '/vendor/superwoman/superplugin/vendor');
+    }
+
+    public function testInstallVendorDir()
+    {
+        $package = $this->pluginPackageFactory(self::SUPPORTED | self::VENDOR_DIR);
+        $this->assertEquals('site/plugins/superplugin', $this->installer->getInstallPath($package));
+        $this->installer->install(new InstalledArrayRepository(), $package);
+        $this->assertFileExists($this->testDir . '/site/plugins/superplugin/index.php');
+        $this->assertFileExists($this->testDir . '/site/plugins/superplugin/vendor-created.txt');
+        $this->assertDirectoryDoesNotExist($this->testDir . '/site/plugins/superplugin/vendor');
     }
 
     public function testInstallWithoutVendorDir()
@@ -119,14 +122,11 @@ class PluginInstallerTest extends InstallerTestCase
         $this->assertDirectoryDoesNotExist($this->testDir . '/site/plugins/superplugin/vendor');
     }
 
-    public function testInstallVendorDir()
+    public function testSupports()
     {
-        $package = $this->pluginPackageFactory(self::SUPPORTED | self::VENDOR_DIR);
-        $this->assertEquals('site/plugins/superplugin', $this->installer->getInstallPath($package));
-        $this->installer->install(new InstalledArrayRepository(), $package);
-        $this->assertFileExists($this->testDir . '/site/plugins/superplugin/index.php');
-        $this->assertFileExists($this->testDir . '/site/plugins/superplugin/vendor-created.txt');
-        $this->assertDirectoryDoesNotExist($this->testDir . '/site/plugins/superplugin/vendor');
+        $this->assertTrue($this->installer->supports('kirby-plugin'));
+        $this->assertFalse($this->installer->supports('kirby-cms'));
+        $this->assertFalse($this->installer->supports('amazing-plugin'));
     }
 
     public function testUpdateNoSupport()
@@ -154,31 +154,6 @@ class PluginInstallerTest extends InstallerTestCase
         $this->assertDirectoryExists($this->testDir . '/vendor/superwoman/superplugin/vendor');
     }
 
-    public function testUpdateWithoutVendorDir()
-    {
-        $repo = new InstalledArrayRepository();
-
-        $initial = $this->pluginPackageFactory(self::SUPPORTED);
-        $this->assertEquals('site/plugins/superplugin', $this->installer->getInstallPath($initial));
-        $this->installer->install($repo, $initial);
-        $repo->addPackage($initial);
-        $this->assertFileExists($this->testDir . '/site/plugins/superplugin/index.php');
-        $this->assertFileDoesNotExist($this->testDir . '/site/plugins/superplugin/vendor-created.txt');
-        $this->assertDirectoryDoesNotExist($this->testDir . '/site/plugins/superplugin/vendor');
-
-        $this->filesystem->emptyDirectory($this->testDir . '/site/plugins/superplugin');
-        $this->assertFileDoesNotExist($this->testDir . '/site/plugins/superplugin/index.php');
-        $this->assertFileDoesNotExist($this->testDir . '/site/plugins/superplugin/vendor-created.txt');
-        $this->assertDirectoryDoesNotExist($this->testDir . '/site/plugins/superplugin/vendor');
-
-        $target = $this->pluginPackageFactory(self::SUPPORTED);
-        $this->assertEquals('site/plugins/superplugin', $this->installer->getInstallPath($target));
-        $this->installer->update($repo, $initial, $target);
-        $this->assertFileExists($this->testDir . '/site/plugins/superplugin/index.php');
-        $this->assertFileDoesNotExist($this->testDir . '/site/plugins/superplugin/vendor-created.txt');
-        $this->assertDirectoryDoesNotExist($this->testDir . '/site/plugins/superplugin/vendor');
-    }
-
     public function testUpdateVendorDir()
     {
         $repo = new InstalledArrayRepository();
@@ -201,6 +176,31 @@ class PluginInstallerTest extends InstallerTestCase
         $this->installer->update($repo, $initial, $target);
         $this->assertFileExists($this->testDir . '/site/plugins/superplugin/index.php');
         $this->assertFileExists($this->testDir . '/site/plugins/superplugin/vendor-created.txt');
+        $this->assertDirectoryDoesNotExist($this->testDir . '/site/plugins/superplugin/vendor');
+    }
+
+    public function testUpdateWithoutVendorDir()
+    {
+        $repo = new InstalledArrayRepository();
+
+        $initial = $this->pluginPackageFactory(self::SUPPORTED);
+        $this->assertEquals('site/plugins/superplugin', $this->installer->getInstallPath($initial));
+        $this->installer->install($repo, $initial);
+        $repo->addPackage($initial);
+        $this->assertFileExists($this->testDir . '/site/plugins/superplugin/index.php');
+        $this->assertFileDoesNotExist($this->testDir . '/site/plugins/superplugin/vendor-created.txt');
+        $this->assertDirectoryDoesNotExist($this->testDir . '/site/plugins/superplugin/vendor');
+
+        $this->filesystem->emptyDirectory($this->testDir . '/site/plugins/superplugin');
+        $this->assertFileDoesNotExist($this->testDir . '/site/plugins/superplugin/index.php');
+        $this->assertFileDoesNotExist($this->testDir . '/site/plugins/superplugin/vendor-created.txt');
+        $this->assertDirectoryDoesNotExist($this->testDir . '/site/plugins/superplugin/vendor');
+
+        $target = $this->pluginPackageFactory(self::SUPPORTED);
+        $this->assertEquals('site/plugins/superplugin', $this->installer->getInstallPath($target));
+        $this->installer->update($repo, $initial, $target);
+        $this->assertFileExists($this->testDir . '/site/plugins/superplugin/index.php');
+        $this->assertFileDoesNotExist($this->testDir . '/site/plugins/superplugin/vendor-created.txt');
         $this->assertDirectoryDoesNotExist($this->testDir . '/site/plugins/superplugin/vendor');
     }
 

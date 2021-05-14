@@ -14,19 +14,6 @@ class CmsInstallerTest extends InstallerTestCase
         $this->installer = new CmsInstaller($this->io, $this->composer);
     }
 
-    public function testSupports()
-    {
-        $this->assertTrue($this->installer->supports('kirby-cms'));
-        $this->assertFalse($this->installer->supports('kirby-plugin'));
-        $this->assertFalse($this->installer->supports('amazing-cms'));
-    }
-
-    public function testGetInstallPathDefault()
-    {
-        $package = $this->cmsPackageFactory();
-        $this->assertEquals('kirby', $this->installer->getInstallPath($package));
-    }
-
     public function testGetInstallPathCustomPath()
     {
         $this->initRootPackage()->setExtra([
@@ -37,14 +24,10 @@ class CmsInstallerTest extends InstallerTestCase
         $this->assertEquals('cms', $this->installer->getInstallPath($package));
     }
 
-    public function testGetInstallPathVendor()
+    public function testGetInstallPathDefault()
     {
-        $this->initRootPackage()->setExtra([
-            'kirby-cms-path' => false
-        ]);
-
         $package = $this->cmsPackageFactory();
-        $this->assertEquals($this->testDir . '/vendor/getkirby/cms', $this->installer->getInstallPath($package));
+        $this->assertEquals('kirby', $this->installer->getInstallPath($package));
     }
 
     public function testGetInstallPathUnsafe1()
@@ -95,6 +78,16 @@ class CmsInstallerTest extends InstallerTestCase
         $this->installer->getInstallPath($package);
     }
 
+    public function testGetInstallPathVendor()
+    {
+        $this->initRootPackage()->setExtra([
+            'kirby-cms-path' => false
+        ]);
+
+        $package = $this->cmsPackageFactory();
+        $this->assertEquals($this->testDir . '/vendor/getkirby/cms', $this->installer->getInstallPath($package));
+    }
+
     public function testInstall()
     {
         $package = $this->cmsPackageFactory();
@@ -117,6 +110,13 @@ class CmsInstallerTest extends InstallerTestCase
         $this->assertFileExists($this->testDir . '/vendor/getkirby/cms/index.php');
         $this->assertFileExists($this->testDir . '/vendor/getkirby/cms/vendor-created.txt');
         $this->assertDirectoryDoesNotExist($this->testDir . '/vendor/getkirby/cms/vendor');
+    }
+
+    public function testSupports()
+    {
+        $this->assertTrue($this->installer->supports('kirby-cms'));
+        $this->assertFalse($this->installer->supports('kirby-plugin'));
+        $this->assertFalse($this->installer->supports('amazing-cms'));
     }
 
     public function testUpdate()

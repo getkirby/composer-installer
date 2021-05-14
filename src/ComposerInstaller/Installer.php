@@ -18,17 +18,6 @@ use RuntimeException;
 class Installer extends LibraryInstaller
 {
     /**
-     * Decides if the installer supports the given type
-     *
-     * @param string $packageType
-     * @return bool
-     */
-    public function supports($packageType): bool
-    {
-        throw new RuntimeException('This method needs to be overridden.'); // @codeCoverageIgnore
-    }
-
-    /**
      * Installs a specific package
      *
      * @param \Composer\Repository\InstalledRepositoryInterface $repo Repository in which to check
@@ -52,6 +41,19 @@ class Installer extends LibraryInstaller
 
         // Composer 1 or Composer 2 without async
         $postInstall();
+    }
+
+    /**
+     * Decides if the installer supports the given type
+     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     *
+     * @param string $packageType
+     * @return bool
+     */
+    public function supports($packageType): bool
+    {
+        throw new RuntimeException('This method needs to be overridden.'); // @codeCoverageIgnore
     }
 
     /**

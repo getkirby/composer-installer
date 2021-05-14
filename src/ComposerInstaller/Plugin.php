@@ -18,6 +18,8 @@ class Plugin implements PluginInterface
     /**
      * Apply plugin modifications to Composer
      *
+     * @SuppressWarnings(PHPMD.ShortVariable)
+     *
      * @param \Composer\Composer $composer
      * @param \Composer\IO\IOInterface $io
      * @return void
@@ -33,6 +35,8 @@ class Plugin implements PluginInterface
      * Remove any hooks from Composer
      *
      * @codeCoverageIgnore
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     * @SuppressWarnings(PHPMD.ShortVariable)
      *
      * @param \Composer\Composer $composer
      * @param \Composer\IO\IOInterface $io
@@ -47,6 +51,8 @@ class Plugin implements PluginInterface
      * Prepare the plugin to be uninstalled
      *
      * @codeCoverageIgnore
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     * @SuppressWarnings(PHPMD.ShortVariable)
      *
      * @param Composer $composer
      * @param IOInterface $io
