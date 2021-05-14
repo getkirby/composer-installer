@@ -1,0 +1,11 @@
+coverage:
+  status:
+    # rules for overall project-wide coverage
+    project:
+      backend:
+        target: 100%
+
+    # rules based on the specific changes of the PR
+    patch:
+      backend:
+        target: 100%

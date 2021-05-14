@@ -1,10 +1,10 @@
 <?php
 
 $finder = PhpCsFixer\Finder::create()
-    ->exclude('dependencies')
     ->in(__DIR__);
 
-return PhpCsFixer\Config::create()
+$config = new PhpCsFixer\Config();
+return $config
     ->setRules([
         '@PSR1' => true,
         '@PSR2' => true,
@@ -12,7 +12,7 @@ return PhpCsFixer\Config::create()
         'array_indentation' => true,
         'array_syntax' => ['syntax' => 'short'],
         'cast_spaces' => ['space' => 'none'],
-        // 'class_keyword_remove' => true, // replaces static::class with 'static' (won't work)
+        'class_keyword_remove' => true,
         'combine_consecutive_issets' => true,
         'combine_consecutive_unsets' => true,
         'combine_nested_dirname' => true,
@@ -42,8 +42,9 @@ return PhpCsFixer\Config::create()
         'no_unneeded_control_parentheses' => true,
         'no_unused_imports' => true,
         'no_useless_return' => true,
+        'ordered_class_elements' => ['sort_algorithm' => 'alpha'],
         'ordered_imports' => ['sort_algorithm' => 'alpha'],
-        // 'phpdoc_add_missing_param_annotation' => ['only_untyped' => false], // adds params in the wrong order
+        'phpdoc_add_missing_param_annotation' => ['only_untyped' => false],
         'phpdoc_align' => ['align' => 'left'],
         'phpdoc_indent' => true,
         'phpdoc_scalar' => true,

@@ -31,5 +31,29 @@ namespace Composer\Installer
          * @var \Composer\Util\Filesystem
          */
         protected $filesystem;
+
+        /**
+         * For test runs with Composer 1
+         * @return \React\Promise\PromiseInterface|null
+         */
+        public function install();
+
+        /**
+         * For test runs with Composer 1
+         * @return \React\Promise\PromiseInterface|null
+         */
+        public function update();
+    }
+}
+
+// for test runs with Composer 1
+namespace React\Promise
+{
+    class PromiseInterface
+    {
+        /**
+         * @return \React\Promise\PromiseInterface
+         */
+        public function then(callable $onFulfilled = null, callable $onRejected = null, callable $onProgress = null);
     }
 }

@@ -1,19 +1,11 @@
-# os
+# OS files
 .DS_Store
 
-# cs fixer
-.php_cs.cache
+# Vendor files
+/vendor
 
-# editors
-*.sublime-project
-*.sublime-workspace
-/.vscode
-/.idea
-
-# tests
-.phpunit.result.cache
+# Cache and temporary files
+/.php-cs-fixer.cache
+/.phpunit.result.cache
 /tests/coverage
 /tests/tmp
-
-# vendor files
-/vendor

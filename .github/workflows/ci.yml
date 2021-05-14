@@ -16,15 +16,15 @@ jobs:
         composer: [ "1", "2" ]
 
     steps:
-      - name: Checkout Composer Installer
-        uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@f1d3225b5376a0791fdee5a0e8eac5289355e43a # pin@v2
 
       - name: Setup PHP environment
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@ed52ff9a52991475b075a4c2144f7276195e8620 # pin@v2
         with:
           php-version: ${{ matrix.php }}
           coverage: pcov
-          tools: phpunit:^9, composer:v2
+          tools: composer:2.0.13, phpunit:9.5.4, psalm:4.7.1
 
       - name: Setup problem matchers
         run: |
@@ -32,13 +32,13 @@ jobs:
           echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
 
       - name: Get Composer cache directory
-        id: composer-cache
+        id: composerCache
         run: echo "::set-output name=dir::$(composer config cache-files-dir)"
 
       - name: Cache dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@1c6fb82ebbd610035c324e764e5e74d0e82f8a60 # pin@v2
         with:
-          path: ${{ steps.composer-cache.outputs.dir }}
+          path: ${{ steps.composerCache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ matrix.composer }}-${{ hashFiles('**/composer.lock') }}
           restore-keys: ${{ runner.os }}-composer-${{ matrix.composer }}-
 
@@ -48,82 +48,139 @@ jobs:
           command=$([ "${{ matrix.composer }}" == 1 ] && echo "update --prefer-lowest" || echo "install")
           composer $command --prefer-dist
 
+      - name: Cache analysis data
+        id: finishPrepare
+        uses: actions/cache@1c6fb82ebbd610035c324e764e5e74d0e82f8a60 # pin@v2
+        with:
+          path: ~/.cache/psalm
+          key: analysis-${{ matrix.php }}-${{ matrix.composer }}
+
       - name: Run tests
+        if: always() && steps.finishPrepare.outcome == 'success'
         run: phpunit --coverage-clover ${{ github.workspace }}/clover.xml
 
-      - name: Upload coverage results to Coveralls
-        env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          COVERALLS_PARALLEL: "true"
-          COVERALLS_FLAG_NAME: ${{ matrix.php }}-${{ matrix.composer }}
-        run: |
-          composer global require -n -q php-coveralls/php-coveralls
-          php-coveralls --coverage_clover=${{ github.workspace }}/clover.xml -o ${{ github.workspace }}/coveralls.json -v
+      - name: Statically analyze using Psalm
+        if: always() && steps.finishPrepare.outcome == 'success'
+        run: psalm --output-format=github --php-version=${{ matrix.php }}
 
-  backend-analysis:
-    name: Backend Analysis
+      - name: Upload coverage results to Codecov
+        uses: codecov/codecov-action@a1ed4b322b4b38cb846afb5a0ebfa17086917d27 # pin@v1
+        with:
+          file: ${{ github.workspace }}/clover.xml
+          env_vars: COMPOSER,PHP
+        env:
+          COMPOSER: ${{ matrix.composer }}
+          PHP: ${{ matrix.php }}
+
+  analysis:
+    name: Analysis
 
     runs-on: ubuntu-latest
     env:
-      php: "7.4"
+      php: "8.0"
+      extensions: mbstring
 
     steps:
-      - name: Checkout Composer Installer
-        uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@f1d3225b5376a0791fdee5a0e8eac5289355e43a # pin@v2
 
-      - name: Setup PHP environment
-        uses: shivammathur/setup-php@v2
+      - name: Setup PHP cache environment
+        id: ext-cache
+        uses: shivammathur/cache-extensions@8828d749a642ae651470bd7713c2266c82cac102 # pin@v1
         with:
           php-version: ${{ env.php }}
-          coverage: none
-          tools: composer:v2, php-cs-fixer, cs2pr, psalm
+          extensions: ${{ env.extensions }}
+          key: php-analysis-v1
 
-      - name: Validate Composer config
-        run: composer validate
+      - name: Cache PHP extensions
+        uses: actions/cache@1c6fb82ebbd610035c324e764e5e74d0e82f8a60 # pin@v2
+        with:
+          path: ${{ steps.ext-cache.outputs.dir }}
+          key: ${{ steps.ext-cache.outputs.key }}
+          restore-keys: ${{ steps.ext-cache.outputs.key }}
+
+      - name: Setup PHP environment
+        id: finishPrepare
+        uses: shivammathur/setup-php@ed52ff9a52991475b075a4c2144f7276195e8620 # pin@v2
+        with:
+          php-version: ${{ env.php }}
+          extensions: ${{ env.extensions }}
+          coverage: none
+          tools: |
+            composer:2.0.13, composer-normalize:2.13.3,
+            phpcpd:6.0.3, phpmd:2.10.0
+
+      - name: Validate composer.json/composer.lock
+        if: always() && steps.finishPrepare.outcome == 'success'
+        run: composer validate --strict
+
+      - name: Ensure that composer.json is normalized
+        if: always() && steps.finishPrepare.outcome == 'success'
+        run: composer-normalize --dry-run
 
       - name: Get Composer cache directory
-        id: composer-cache
+        id: composerCache1
+        if: always() && steps.finishPrepare.outcome == 'success'
         run: echo "::set-output name=dir::$(composer config cache-files-dir)"
 
       - name: Cache dependencies
-        uses: actions/cache@v2
+        id: composerCache2
+        if: always() && steps.composerCache1.outcome == 'success'
+        uses: actions/cache@1c6fb82ebbd610035c324e764e5e74d0e82f8a60 # pin@v2
         with:
-          path: ${{ steps.composer-cache.outputs.dir }}
+          path: ${{ steps.composerCache1.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ matrix.composer }}-${{ hashFiles('**/composer.lock') }}
           restore-keys: ${{ runner.os }}-composer-${{ matrix.composer }}-
 
       - name: Install dependencies
+        id: composerInstall
+        if: always() && steps.composerCache2.outcome == 'success'
         run: composer install --prefer-dist
 
-      - name: Cache analysis data
-        id: finishPrepare
-        uses: actions/cache@v2
-        with:
-          path: |
-            ~/.php-cs-fixer
-            ~/.cache/psalm
-          key: backend-analysis
+      - name: Check for duplicated code
+        if: always() && steps.composerInstall.outcome == 'success'
+        run: phpcpd --fuzzy --exclude tests --exclude vendor .
 
-      - name: Run PHP-CS-Fixer
-        if: always() && steps.finishPrepare.outcome == 'success'
-        env:
-          PHP_CS_FIXER_IGNORE_ENV: 1
-        run: |
-          php-cs-fixer fix --dry-run --format=checkstyle | cs2pr
+      - name: Statically analyze using PHPMD
+        if: always() && steps.composerInstall.outcome == 'success'
+        run: phpmd . github phpmd.xml.dist --exclude 'tests/*,vendor/*'
 
-      - name: Run Psalm
-        if: always() && steps.finishPrepare.outcome == 'success'
-        run: psalm --output-format=github
+  coding-style:
+    name: Coding Style
 
-  coveralls-upload:
-    name: Coveralls Upload
-
-    needs: tests
     runs-on: ubuntu-latest
 
     steps:
-    - name: Send the Coveralls Finished webhook
-      uses: coverallsapp/github-action@master
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        parallel-finished: true
+      - name: Checkout
+        uses: actions/checkout@f1d3225b5376a0791fdee5a0e8eac5289355e43a # pin@v2
+
+      - name: Setup PHP environment
+        uses: shivammathur/setup-php@ed52ff9a52991475b075a4c2144f7276195e8620 # pin@v2
+        with:
+          coverage: none
+          tools: php-cs-fixer:3.0.0
+
+      - name: Cache analysis data
+        id: finishPrepare
+        uses: actions/cache@1c6fb82ebbd610035c324e764e5e74d0e82f8a60 # pin@v2
+        with:
+          path: ~/.php-cs-fixer
+          key: coding-style
+
+      - name: Check for PHP coding style violations
+        if: always() && steps.finishPrepare.outcome == 'success'
+        env:
+          PHP_CS_FIXER_IGNORE_ENV: 1
+        # Use the --dry-run flag in push builds to get a failed CI status
+        run: >
+          php-cs-fixer fix --diff
+          ${{ github.event_name != 'pull_request' && '--dry-run' || '' }}
+
+      - name: Create code suggestions from the coding style changes (on PR only)
+        if: >
+          always() && steps.finishPrepare.outcome == 'success' &&
+          github.event_name == 'pull_request'
+        uses: reviewdog/action-suggester@5d5b9f8c693e036796f828e47886bd10d368c273 # pin@v1
+        with:
+          tool_name: PHP-CS-Fixer
+          fail_on_error: 'true'
