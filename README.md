@@ -1,7 +1,7 @@
 # Kirby Composer Installer
 
 [![CI Status](https://github.com/getkirby/composer-installer/workflows/CI/badge.svg)](https://github.com/getkirby/composer-installer/actions?query=workflow%3ACI)
-[![Coverage Status](https://badgen.net/coveralls/c/github/getkirby/composer-installer)](https://coveralls.io/github/getkirby/composer-installer)
+[![Coverage Status](https://badgen.net/codecov/c/gh/getkirby/composer-installer/main?label=coverage)](https://codecov.io/gh/getkirby/composer-installer)
 
 This is Kirby's custom [Composer installer](https://getcomposer.org/doc/articles/custom-installers.md) for the Kirby CMS.
 It is responsible for automatically choosing the correct installation paths if you install the CMS via Composer.
